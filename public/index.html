@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .nav { margin: 20px 0; }
+        .nav a { margin-right: 20px; padding: 10px; background: #007cba; color: white; text-decoration: none; }
+        form { margin: 20px 0; padding: 20px; border: 1px solid #ddd; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        form h3 { grid-column: 1 / -1; margin: 0 0 10px 0; }
+        input, select, textarea, button { padding: 8px; border: 1px solid #ddd; }
+        button { grid-column: 1 / -1; cursor: pointer; background: #007cba; color: white; border: none; margin-top: 10px; }
+        textarea { grid-column: 1 / -1; resize: vertical; }
+        .success { color: green; margin: 10px 0; }
+        .error { color: red; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Portfolio Management</h1>
+    
+    <div class="nav">
+        <a href="table.html">View Table</a>
+        <a href="charts.html">View Charts</a>
+    </div>
+    
+    <form id="add-form">
+        <h3>Add New Holding</h3>
+        <input type="text" id="ticker" placeholder="Stock Ticker (e.g. AAPL)" required>
+        <input type="text" id="company" placeholder="Company Name" required>
+        <select id="asset_type" required>
+            <option value="stock">Stock</option>
+            <option value="bond">Bond</option>
+            <option value="etf">ETF</option>
+            <option value="crypto">Crypto</option>
+            <option value="cash">Cash</option>
+        </select>
+        <input type="number" id="volume" placeholder="Volume" min="1" required>
+        <input type="number" id="purchase_price" placeholder="Purchase Price (₹)" step="0.01" min="0" required>
+        <input type="number" id="current_price" placeholder="Current Price (₹)" step="0.01" min="0">
+        <input type="text" id="sector" placeholder="Sector (e.g. Technology)">
+        <select id="risk_level">
+            <option value="low">Low Risk</option>
+            <option value="medium" selected>Medium Risk</option>
+            <option value="high">High Risk</option>
+        </select>
+        <input type="date" id="purchase_date" required>
+        <textarea id="notes" placeholder="Notes (optional)" rows="2"></textarea>
+        <button type="submit">Add Holding</button>
+    </form>
+    
+    <div id="message"></div>
+
+    <script>
+        const API_URL = '/api/portfolio';
+
+        async function loadPortfolio() {
+            try {
+                const response = await fetch(API_URL);
+                const holdings = await response.json();
+                displayPortfolio(holdings);
+            } catch (error) {
+                console.error('Error loading portfolio:', error);
+            }
+        }
+
+        function displayPortfolio(holdings) {
+            const tableDiv = document.getElementById('portfolio-table');
+            if (holdings.length === 0) {
+                tableDiv.innerHTML = '<p>No holdings found.</p>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Stock Ticker</th>
+                        <th>Volume</th>
+                        <th>Actions</th>
+                    </tr>
+            `;
+            
+            holdings.forEach(holding => {
+                html += `
+                    <tr>
+                        <td>${holding.id}</td>
+                        <td>${holding.stock_ticker}</td>
+                        <td>${holding.volume}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteHolding(${holding.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</table>';
+            tableDiv.innerHTML = html;
+        }
+
+        async function addHolding(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+
+            const data = {
+                stock_ticker: document.getElementById('ticker').value.toUpperCase(),
+                company_name: document.getElementById('company').value,
+                asset_type: document.getElementById('asset_type').value,
+                volume: parseInt(document.getElementById('volume').value),
+                purchase_price: parseFloat(document.getElementById('purchase_price').value),
+                current_price: parseFloat(document.getElementById('current_price').value) || 0,
+                sector: document.getElementById('sector').value,
+                risk_level: document.getElementById('risk_level').value,
+                purchase_date: document.getElementById('purchase_date').value,
+                notes: document.getElementById('notes').value
+            };
+
+            if (!data.stock_ticker || !data.company_name || !data.volume || !data.purchase_price || !data.purchase_date) {
+                messageDiv.innerHTML = '<div class="error">Please fill in all required fields</div>';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('add-form').reset();
+                    messageDiv.innerHTML = '<div class="success">Holding added successfully!</div>';
+                    setTimeout(() => messageDiv.innerHTML = '', 3000);
+                } else {
+                    const error = await response.json();
+                    messageDiv.innerHTML = `<div class="error">Error: ${error.error}</div>`;
+                }
+            } catch (error) {
+                console.error('Error adding holding:', error);
+                messageDiv.innerHTML = '<div class="error">Network error. Please try again.</div>';
+            }
+        }
+
+        document.getElementById('add-form').addEventListener('submit', addHolding);
+    </script>
+</body>
+</html>
