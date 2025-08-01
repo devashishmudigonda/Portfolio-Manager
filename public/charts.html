@@ -1,60 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Portfolio Analytics Dashboard</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-        .nav { margin: 20px 0; }
-        .nav a { margin-right: 20px; padding: 10px; background: #007cba; color: white; text-decoration: none; border-radius: 5px; }
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .full-width { grid-column: 1 / -1; }
-        .bar { margin: 8px 0; padding: 12px; position: relative; border-radius: 5px; }
-        .bar-label { position: absolute; left: 15px; font-weight: bold; }
-        .bar-value { position: absolute; right: 15px; }
-        .pie-chart { width: 350px; height: 350px; margin: 10px auto; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
-        .stat-box { background: white; text-align: center; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .stat-number { font-size: 2.2em; font-weight: bold; margin-bottom: 5px; }
-        .sector-bar { height: 30px; margin: 5px 0; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; }
-        .risk-indicator { width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin-right: 10px; }
-    </style>
+    <title>Analytics Dashboard - Portfolio Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Portfolio Analytics Dashboard</h1>
-    
-    <div class="nav">
-        <a href="index.html">Add Holdings</a>
-        <a href="table.html">View Table</a>
-    </div>
-    
-    <div class="stats" id="stats"></div>
-    
-    <div class="dashboard">
-        <div class="chart-container">
-            <h3>Top Holdings by Value</h3>
-            <div id="value-chart"></div>
-        </div>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>Portfolio Pro</h1>
+                <p>Investment Management</p>
+            </div>
+            <div class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-plus-circle"></i> Add Holdings
+                </a>
+                <a href="table.html" class="nav-item">
+                    <i class="fas fa-table"></i> View Portfolio
+                </a>
+                <a href="charts.html" class="nav-item active">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </div>
+        </nav>
         
-        <div class="chart-container">
-            <h3>Portfolio Distribution</h3>
-            <canvas id="pie-chart" class="pie-chart"></canvas>
-        </div>
-        
-        <div class="chart-container">
-            <h3>Sector Allocation</h3>
-            <div id="sector-chart"></div>
-        </div>
-        
-        <div class="chart-container">
-            <h3>Risk Distribution</h3>
-            <div id="risk-chart"></div>
-        </div>
-        
-        <div class="chart-container full-width">
-            <h3>Performance Analysis</h3>
-            <div id="performance-chart"></div>
-        </div>
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Portfolio Analytics</h1>
+                <p class="page-subtitle">Comprehensive insights into your investment performance</p>
+            </div>
+            
+            <div id="portfolio-stats"></div>
+            
+            <div class="charts-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Performance Analysis</h2>
+                        <p class="card-subtitle">Gain/Loss visualization with zero-line reference</p>
+                    </div>
+                    <div id="performance-chart"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Portfolio Distribution</h2>
+                        <p class="card-subtitle">Asset allocation by value</p>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="pie-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Sector Allocation</h2>
+                        <p class="card-subtitle">Investment distribution across sectors</p>
+                    </div>
+                    <div id="sector-chart"></div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Risk Analysis</h2>
+                        <p class="card-subtitle">Portfolio risk distribution</p>
+                    </div>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="risk-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card chart-full">
+                    <div class="card-header">
+                        <h2 class="card-title">Top Holdings Performance</h2>
+                        <p class="card-subtitle">Individual stock performance breakdown</p>
+                    </div>
+                    <div id="holdings-performance"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -64,12 +89,34 @@
             try {
                 const response = await fetch(API_URL);
                 const holdings = await response.json();
+                
+                if (holdings.length === 0) {
+                    document.querySelector('.main-content').innerHTML = `
+                        <div class="page-header">
+                            <h1 class="page-title">Portfolio Analytics</h1>
+                            <p class="page-subtitle">No data available for analysis</p>
+                        </div>
+                        <div class="card" style="text-align: center; padding: 60px;">
+                            <i class="fas fa-chart-line" style="font-size: 4em; color: #e0e0e0; margin-bottom: 20px;"></i>
+                            <h3>No Portfolio Data</h3>
+                            <p>Add some holdings to see detailed analytics and insights.</p>
+                            <a href="index.html" class="btn btn-primary" style="margin-top: 20px;">
+                                <i class="fas fa-plus"></i> Add Your First Holding
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+                
                 displayStats(holdings);
-                displayBarChart(holdings);
+                displayPerformanceChart(holdings);
                 displayPieChart(holdings);
+                displaySectorChart(holdings);
+                displayRiskChart(holdings);
+                displayHoldingsPerformance(holdings);
             } catch (error) {
                 console.error('Error loading portfolio:', error);
-                document.getElementById('stats').innerHTML = '<p>Error loading portfolio data.</p>';
+                document.getElementById('portfolio-stats').innerHTML = '<div class="message error">Error loading portfolio data.</div>';
             }
         }
 
@@ -78,55 +125,124 @@
             const totalCost = holdings.reduce((sum, holding) => sum + (holding.purchase_price * holding.volume), 0);
             const totalGainLoss = totalValue - totalCost;
             const gainLossPercent = totalCost > 0 ? ((totalGainLoss / totalCost) * 100) : 0;
-            const totalStocks = holdings.length;
+            const bestPerformer = holdings.reduce((best, holding) => {
+                const currentGain = ((holding.current_price - holding.purchase_price) / holding.purchase_price) * 100;
+                const bestGain = ((best.current_price - best.purchase_price) / best.purchase_price) * 100;
+                return currentGain > bestGain ? holding : best;
+            }, holdings[0]);
 
-            document.getElementById('stats').innerHTML = `
-                <div class="stat-box">
-                    <div class="stat-number">${totalStocks}</div>
-                    <div>Total Holdings</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number" style="color: #007cba;">₹${totalValue.toFixed(0)}</div>
-                    <div>Portfolio Value</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number" style="color: #6c757d;">₹${totalCost.toFixed(0)}</div>
-                    <div>Total Investment</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number" style="color: ${totalGainLoss >= 0 ? '#28a745' : '#dc3545'}">₹${totalGainLoss.toFixed(0)}</div>
-                    <div>Gain/Loss (${gainLossPercent.toFixed(1)}%)</div>
+            document.getElementById('portfolio-stats').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #667eea;">₹${totalValue.toLocaleString()}</div>
+                        <div class="stat-label">Portfolio Value</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: ${totalGainLoss >= 0 ? '#27ae60' : '#e74c3c'}">₹${totalGainLoss.toLocaleString()}</div>
+                        <div class="stat-label">Total P&L (${gainLossPercent.toFixed(1)}%)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #f39c12;">${holdings.length}</div>
+                        <div class="stat-label">Total Holdings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #27ae60;">${bestPerformer.stock_ticker}</div>
+                        <div class="stat-label">Best Performer</div>
+                    </div>
                 </div>
             `;
         }
 
-        function displayValueChart(holdings) {
-            const chartDiv = document.getElementById('value-chart');
-            if (holdings.length === 0) {
-                chartDiv.innerHTML = '<p>No data to display</p>';
-                return;
-            }
-
-            const sortedHoldings = holdings.sort((a, b) => (b.current_price * b.volume) - (a.current_price * a.volume)).slice(0, 8);
-            const maxValue = Math.max(...sortedHoldings.map(h => h.current_price * h.volume));
-            let html = '';
-
-            sortedHoldings.forEach(holding => {
-                const value = holding.current_price * holding.volume;
-                const width = (value / maxValue) * 100;
+        function displayPerformanceChart(holdings) {
+            const chartDiv = document.getElementById('performance-chart');
+            const maxAbsValue = Math.max(...holdings.map(h => Math.abs((h.current_price - h.purchase_price) * h.volume)));
+            
+            let html = '<div style="position: relative; padding: 20px 0;">';
+            
+            // Add zero line
+            html += '<div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #2c3e50; z-index: 1;"></div>';
+            html += '<div style="position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: #2c3e50; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 2;">₹0</div>';
+            
+            holdings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
-                const color = gainLoss >= 0 ? '#28a745' : '#dc3545';
                 const percentage = ((holding.current_price - holding.purchase_price) / holding.purchase_price * 100).toFixed(1);
+                const width = Math.min((Math.abs(gainLoss) / maxAbsValue) * 45, 45); // 45% max width, ensure it doesn't exceed
                 
-                html += `
-                    <div class="bar" style="width: ${width}%; background-color: ${color}">
-                        <span class="bar-label">${holding.stock_ticker} (${percentage}%)</span>
-                        <span class="bar-value">₹${value.toFixed(0)}</span>
-                    </div>
-                `;
+                if (gainLoss >= 0) {
+                    // Positive performance - right side
+                    html += `
+                        <div style="display: flex; align-items: center; margin: 8px 0; height: 40px; position: relative;">
+                            <div style="width: 50%; text-align: right; padding-right: 15px; font-weight: 600; color: #2c3e50;">
+                                ${holding.stock_ticker}
+                            </div>
+                            <div style="width: ${width}%; background: linear-gradient(90deg, #27ae60, #2ecc71); height: 100%; border-radius: 0 20px 20px 0; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: 600; min-width: 100px; max-width: 45%;">
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">+₹${gainLoss.toLocaleString()} (${percentage}%)</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Negative performance - left side
+                    html += `
+                        <div style="display: flex; align-items: center; margin: 8px 0; height: 40px; position: relative;">
+                            <div style="width: 50%; display: flex; justify-content: flex-end; position: relative;">
+                                <div style="width: ${width}%; background: linear-gradient(270deg, #e74c3c, #c0392b); height: 40px; border-radius: 20px 0 0 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; color: white; font-weight: 600; min-width: 100px; max-width: 100%;">
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-₹${Math.abs(gainLoss).toLocaleString()} (${Math.abs(parseFloat(percentage))}%)</span>
+                                </div>
+                            </div>
+                            <div style="width: 50%; text-align: left; padding-left: 15px; font-weight: 600; color: #2c3e50;">
+                                ${holding.stock_ticker}
+                            </div>
+                        </div>
+                    `;
+                }
             });
-
+            
+            html += '</div>';
             chartDiv.innerHTML = html;
+        }
+
+        function displayPieChart(holdings) {
+            const canvas = document.getElementById('pie-chart');
+            const ctx = canvas.getContext('2d');
+            
+            const colors = ['#667eea', '#27ae60', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#ff6b6b', '#4ecdc4'];
+            const data = holdings.map((holding, index) => ({
+                label: holding.stock_ticker,
+                value: holding.current_price * holding.volume,
+                color: colors[index % colors.length]
+            }));
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.label),
+                    datasets: [{
+                        data: data.map(d => d.value),
+                        backgroundColor: data.map(d => d.color),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 10
+                    }
+                }
+            });
         }
 
         function displaySectorChart(holdings) {
@@ -139,16 +255,22 @@
 
             const chartDiv = document.getElementById('sector-chart');
             const maxValue = Math.max(...Object.values(sectorData));
-            const colors = ['#007cba', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14'];
+            const colors = ['#667eea', '#27ae60', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
             let html = '';
             let colorIndex = 0;
 
             Object.entries(sectorData).forEach(([sector, value]) => {
                 const width = (value / maxValue) * 100;
+                const percentage = ((value / Object.values(sectorData).reduce((a, b) => a + b, 0)) * 100).toFixed(1);
                 html += `
-                    <div class="sector-bar" style="width: ${width}%; background-color: ${colors[colorIndex % colors.length]}">
-                        <span>${sector}</span>
-                        <span>₹${value.toFixed(0)}</span>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-weight: 600; color: #2c3e50;">${sector}</span>
+                            <span style="color: #7f8c8d;">${percentage}% (₹${value.toLocaleString()})</span>
+                        </div>
+                        <div style="background: #f8f9fa; border-radius: 10px; height: 12px; overflow: hidden;">
+                            <div style="width: ${width}%; height: 100%; background: ${colors[colorIndex % colors.length]}; border-radius: 10px; transition: width 0.3s ease;"></div>
+                        </div>
                     </div>
                 `;
                 colorIndex++;
@@ -164,47 +286,76 @@
                 riskData[holding.risk_level] += value;
             });
 
-            const chartDiv = document.getElementById('risk-chart');
-            const total = Object.values(riskData).reduce((sum, val) => sum + val, 0);
-            const riskColors = { low: '#28a745', medium: '#ffc107', high: '#dc3545' };
+            const canvas = document.getElementById('risk-chart');
+            const ctx = canvas.getContext('2d');
             
-            let html = '';
-            Object.entries(riskData).forEach(([risk, value]) => {
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                html += `
-                    <div style="margin: 10px 0; display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <span class="risk-indicator" style="background-color: ${riskColors[risk]}"></span>
-                            ${risk.toUpperCase()} RISK
-                        </div>
-                        <div>
-                            <strong>${percentage}%</strong> (₹${value.toFixed(0)})
-                        </div>
-                    </div>
-                `;
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low Risk', 'Medium Risk', 'High Risk'],
+                    datasets: [{
+                        data: [riskData.low, riskData.medium, riskData.high],
+                        backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 10
+                    }
+                }
             });
-
-            chartDiv.innerHTML = html;
         }
 
-        function displayPerformanceChart(holdings) {
-            const chartDiv = document.getElementById('performance-chart');
-            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">';
+        function displayHoldingsPerformance(holdings) {
+            const chartDiv = document.getElementById('holdings-performance');
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">';
             
             holdings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
                 const percentage = ((holding.current_price - holding.purchase_price) / holding.purchase_price * 100).toFixed(2);
-                const color = gainLoss >= 0 ? '#28a745' : '#dc3545';
+                const color = gainLoss >= 0 ? '#27ae60' : '#e74c3c';
+                const icon = gainLoss >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
                 
                 html += `
-                    <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid ${color}; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-                        <div style="font-weight: bold; margin-bottom: 5px;">${holding.stock_ticker}</div>
-                        <div style="font-size: 0.9em; color: #666; margin-bottom: 8px;">${holding.company_name}</div>
-                        <div style="color: ${color}; font-weight: bold;">
-                            ₹${gainLoss.toFixed(0)} (${percentage}%)
+                    <div style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 16px; border-left: 4px solid ${color}; box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <div style="font-weight: bold; font-size: 18px; color: #2c3e50; margin-bottom: 5px;">${holding.stock_ticker}</div>
+                                <div style="font-size: 14px; color: #7f8c8d;">${holding.company_name}</div>
+                            </div>
+                            <i class="fas ${icon}" style="color: ${color}; font-size: 24px;"></i>
                         </div>
-                        <div style="font-size: 0.8em; color: #888; margin-top: 5px;">
-                            ₹${holding.purchase_price} → ₹${holding.current_price}
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="color: #7f8c8d;">Purchase:</span>
+                            <span style="font-weight: 600;">₹${holding.purchase_price.toLocaleString()}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                            <span style="color: #7f8c8d;">Current:</span>
+                            <span style="font-weight: 600;">₹${holding.current_price.toLocaleString()}</span>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: rgba(${gainLoss >= 0 ? '39, 174, 96' : '231, 76, 60'}, 0.1); border-radius: 12px;">
+                            <div style="color: ${color}; font-weight: bold; font-size: 18px;">
+                                ${gainLoss >= 0 ? '+' : ''}₹${gainLoss.toLocaleString()}
+                            </div>
+                            <div style="color: ${color}; font-weight: 600; font-size: 14px;">
+                                ${gainLoss >= 0 ? '+' : ''}${percentage}%
+                            </div>
                         </div>
                     </div>
                 `;
@@ -212,67 +363,6 @@
             
             html += '</div>';
             chartDiv.innerHTML = html;
-        }
-
-        function displayPieChart(holdings) {
-            const canvas = document.getElementById('pie-chart');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 400;
-            canvas.height = 400;
-
-            if (holdings.length === 0) {
-                ctx.fillText('No data to display', 200, 200);
-                return;
-            }
-
-            const totalValue = holdings.reduce((sum, holding) => sum + (holding.current_price * holding.volume), 0);
-            const colors = ['#007cba', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
-            
-            let currentAngle = 0;
-            const centerX = 200;
-            const centerY = 200;
-            const radius = 150;
-
-            holdings.forEach((holding, index) => {
-                const value = holding.current_price * holding.volume;
-                const sliceAngle = (value / totalValue) * 2 * Math.PI;
-                
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-                ctx.closePath();
-                ctx.fillStyle = colors[index % colors.length];
-                ctx.fill();
-                
-                // Add labels
-                const labelAngle = currentAngle + sliceAngle / 2;
-                const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7);
-                const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7);
-                
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(holding.stock_ticker, labelX, labelY);
-                ctx.fillText(`₹${value.toFixed(0)}`, labelX, labelY + 15);
-                
-                currentAngle += sliceAngle;
-            });
-        }
-
-        async function loadPortfolio() {
-            try {
-                const response = await fetch(API_URL);
-                const holdings = await response.json();
-                displayStats(holdings);
-                displayValueChart(holdings);
-                displayPieChart(holdings);
-                displaySectorChart(holdings);
-                displayRiskChart(holdings);
-                displayPerformanceChart(holdings);
-            } catch (error) {
-                console.error('Error loading portfolio:', error);
-                document.getElementById('stats').innerHTML = '<p>Error loading portfolio data.</p>';
-            }
         }
 
         loadPortfolio();

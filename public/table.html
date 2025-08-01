@@ -1,34 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Portfolio Table View</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .nav { margin: 20px 0; }
-        .nav a { margin-right: 20px; padding: 10px; background: #007cba; color: white; text-decoration: none; }
-        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .delete-btn { background-color: #ff4444; color: white; border: none; padding: 5px 10px; cursor: pointer; }
-        .total { font-weight: bold; background-color: #e8f4f8; }
-        .gain { color: #28a745; font-weight: bold; }
-        .loss { color: #dc3545; font-weight: bold; }
-        .risk-low { color: #28a745; }
-        .risk-medium { color: #ffc107; }
-        .risk-high { color: #dc3545; }
-        table { font-size: 12px; }
-        th, td { padding: 6px; }
-    </style>
+    <title>Portfolio Table - Portfolio Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Portfolio Holdings - Table View</h1>
-    
-    <div class="nav">
-        <a href="index.html">Add Holdings</a>
-        <a href="charts.html">View Charts</a>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>Portfolio Pro</h1>
+                <p>Investment Management</p>
+            </div>
+            <div class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <i class="fas fa-plus-circle"></i> Add Holdings
+                </a>
+                <a href="table.html" class="nav-item active">
+                    <i class="fas fa-table"></i> View Portfolio
+                </a>
+                <a href="charts.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Portfolio Holdings</h1>
+                <p class="page-subtitle">Complete overview of your investment portfolio</p>
+            </div>
+            
+            <div id="portfolio-stats"></div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Holdings Details</h2>
+                    <p class="card-subtitle">Detailed breakdown of all your investments</p>
+                </div>
+                <div id="portfolio-table"></div>
+            </div>
+        </main>
     </div>
-    
-    <div id="portfolio-table"></div>
 
     <script>
         const API_URL = '/api/portfolio';
@@ -47,7 +60,17 @@
         function displayPortfolio(holdings) {
             const tableDiv = document.getElementById('portfolio-table');
             if (holdings.length === 0) {
-                tableDiv.innerHTML = '<p>No holdings found. <a href="index.html">Add some holdings</a></p>';
+                document.getElementById('portfolio-stats').innerHTML = '';
+                tableDiv.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
+                        <i class="fas fa-chart-line" style="font-size: 4em; margin-bottom: 20px; opacity: 0.3;"></i>
+                        <h3>No Holdings Found</h3>
+                        <p>Start building your portfolio by adding your first investment.</p>
+                        <a href="index.html" class="btn btn-primary" style="margin-top: 20px;">
+                            <i class="fas fa-plus"></i> Add Your First Holding
+                        </a>
+                    </div>
+                `;
                 return;
             }
 
@@ -55,22 +78,49 @@
             const totalValue = holdings.reduce((sum, holding) => sum + (holding.current_price * holding.volume), 0);
             const totalCost = holdings.reduce((sum, holding) => sum + (holding.purchase_price * holding.volume), 0);
             const totalGainLoss = totalValue - totalCost;
+            const gainLossPercent = totalCost > 0 ? ((totalGainLoss / totalCost) * 100) : 0;
+
+            // Display stats first
+            document.getElementById('portfolio-stats').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #667eea;">${holdings.length}</div>
+                        <div class="stat-label">Total Holdings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #667eea;">₹${totalValue.toLocaleString()}</div>
+                        <div class="stat-label">Portfolio Value</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: #7f8c8d;">₹${totalCost.toLocaleString()}</div>
+                        <div class="stat-label">Total Investment</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" style="color: ${totalGainLoss >= 0 ? '#27ae60' : '#e74c3c'}">₹${totalGainLoss.toLocaleString()}</div>
+                        <div class="stat-label">Gain/Loss (${gainLossPercent.toFixed(1)}%)</div>
+                    </div>
+                </div>
+            `;
 
             let html = `
-                <table>
-                    <tr>
-                        <th>Ticker</th>
-                        <th>Company</th>
-                        <th>Type</th>
-                        <th>Volume</th>
-                        <th>Purchase Price</th>
-                        <th>Current Price</th>
-                        <th>Total Value</th>
-                        <th>Gain/Loss</th>
-                        <th>Sector</th>
-                        <th>Risk</th>
-                        <th>Actions</th>
-                    </tr>
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-chart-line"></i> Ticker</th>
+                                <th><i class="fas fa-building"></i> Company</th>
+                                <th><i class="fas fa-tags"></i> Type</th>
+                                <th><i class="fas fa-coins"></i> Volume</th>
+                                <th><i class="fas fa-rupee-sign"></i> Purchase</th>
+                                <th><i class="fas fa-rupee-sign"></i> Current</th>
+                                <th><i class="fas fa-calculator"></i> Value</th>
+                                <th><i class="fas fa-trending-up"></i> P&L</th>
+                                <th><i class="fas fa-industry"></i> Sector</th>
+                                <th><i class="fas fa-shield-alt"></i> Risk</th>
+                                <th><i class="fas fa-cog"></i> Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
             `;
             
             holdings.forEach(holding => {
@@ -79,33 +129,32 @@
                 const gainLoss = totalHoldingValue - totalHoldingCost;
                 const gainLossClass = gainLoss >= 0 ? 'gain' : 'loss';
                 
+                const percentage = ((holding.current_price - holding.purchase_price) / holding.purchase_price * 100).toFixed(1);
                 html += `
                     <tr>
                         <td><strong>${holding.stock_ticker}</strong></td>
                         <td>${holding.company_name}</td>
-                        <td>${holding.asset_type}</td>
-                        <td>${holding.volume}</td>
-                        <td>₹${holding.purchase_price}</td>
-                        <td>₹${holding.current_price}</td>
-                        <td>₹${totalHoldingValue.toFixed(2)}</td>
-                        <td class="${gainLossClass}">₹${gainLoss.toFixed(2)}</td>
+                        <td><span class="badge">${holding.asset_type.toUpperCase()}</span></td>
+                        <td>${holding.volume.toLocaleString()}</td>
+                        <td>₹${holding.purchase_price.toLocaleString()}</td>
+                        <td>₹${holding.current_price.toLocaleString()}</td>
+                        <td><strong>₹${totalHoldingValue.toLocaleString()}</strong></td>
+                        <td class="${gainLossClass}">₹${gainLoss.toLocaleString()} (${percentage}%)</td>
                         <td>${holding.sector || '-'}</td>
-                        <td class="risk-${holding.risk_level}">${holding.risk_level}</td>
+                        <td><span class="risk-${holding.risk_level}">${holding.risk_level.toUpperCase()}</span></td>
                         <td>
-                            <button class="delete-btn" onclick="deleteHolding(${holding.id})">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteHolding(${holding.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                 `;
             });
             
             html += `
-                    <tr class="total">
-                        <td colspan="6"><strong>Portfolio Totals</strong></td>
-                        <td><strong>₹${totalValue.toFixed(2)}</strong></td>
-                        <td class="${totalGainLoss >= 0 ? 'gain' : 'loss'}"><strong>₹${totalGainLoss.toFixed(2)}</strong></td>
-                        <td colspan="3"><strong>${holdings.length} holdings</strong></td>
-                    </tr>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             `;
             tableDiv.innerHTML = html;
         }

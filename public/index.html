@@ -1,54 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Portfolio Management</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .nav { margin: 20px 0; }
-        .nav a { margin-right: 20px; padding: 10px; background: #007cba; color: white; text-decoration: none; }
-        form { margin: 20px 0; padding: 20px; border: 1px solid #ddd; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        form h3 { grid-column: 1 / -1; margin: 0 0 10px 0; }
-        input, select, textarea, button { padding: 8px; border: 1px solid #ddd; }
-        button { grid-column: 1 / -1; cursor: pointer; background: #007cba; color: white; border: none; margin-top: 10px; }
-        textarea { grid-column: 1 / -1; resize: vertical; }
-        .success { color: green; margin: 10px 0; }
-        .error { color: red; margin: 10px 0; }
-    </style>
+    <title>Add Holdings - Portfolio Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Portfolio Management</h1>
-    
-    <div class="nav">
-        <a href="table.html">View Table</a>
-        <a href="charts.html">View Charts</a>
+    <div class="app-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h1>Portfolio Pro</h1>
+                <p>Investment Management</p>
+            </div>
+            <div class="sidebar-nav">
+                <a href="index.html" class="nav-item active">
+                    <i class="fas fa-plus-circle"></i> Add Holdings
+                </a>
+                <a href="table.html" class="nav-item">
+                    <i class="fas fa-table"></i> View Portfolio
+                </a>
+                <a href="charts.html" class="nav-item">
+                    <i class="fas fa-chart-line"></i> Analytics
+                </a>
+            </div>
+        </nav>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Add New Holding</h1>
+                <p class="page-subtitle">Expand your investment portfolio with new assets</p>
+            </div>
+            
+            <div class="card">
+                <form id="add-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Stock Ticker *</label>
+                            <input type="text" id="ticker" class="form-input" placeholder="e.g. RELIANCE" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Company Name *</label>
+                            <input type="text" id="company" class="form-input" placeholder="e.g. Reliance Industries Ltd." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Asset Type *</label>
+                            <select id="asset_type" class="form-select" required>
+                                <option value="stock">Stock</option>
+                                <option value="bond">Bond</option>
+                                <option value="etf">ETF</option>
+                                <option value="crypto">Cryptocurrency</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Volume *</label>
+                            <input type="number" id="volume" class="form-input" placeholder="Number of shares" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Purchase Price (₹) *</label>
+                            <input type="number" id="purchase_price" class="form-input" placeholder="0.00" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Current Price (₹)</label>
+                            <input type="number" id="current_price" class="form-input" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sector</label>
+                            <input type="text" id="sector" class="form-input" placeholder="e.g. Technology">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Risk Level</label>
+                            <select id="risk_level" class="form-select">
+                                <option value="low">Low Risk</option>
+                                <option value="medium" selected>Medium Risk</option>
+                                <option value="high">High Risk</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Purchase Date *</label>
+                            <input type="date" id="purchase_date" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea id="notes" class="form-textarea" placeholder="Additional notes about this investment (optional)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add to Portfolio
+                    </button>
+                </form>
+                
+                <div id="message"></div>
+            </div>
+        </main>
     </div>
-    
-    <form id="add-form">
-        <h3>Add New Holding</h3>
-        <input type="text" id="ticker" placeholder="Stock Ticker (e.g. AAPL)" required>
-        <input type="text" id="company" placeholder="Company Name" required>
-        <select id="asset_type" required>
-            <option value="stock">Stock</option>
-            <option value="bond">Bond</option>
-            <option value="etf">ETF</option>
-            <option value="crypto">Crypto</option>
-            <option value="cash">Cash</option>
-        </select>
-        <input type="number" id="volume" placeholder="Volume" min="1" required>
-        <input type="number" id="purchase_price" placeholder="Purchase Price (₹)" step="0.01" min="0" required>
-        <input type="number" id="current_price" placeholder="Current Price (₹)" step="0.01" min="0">
-        <input type="text" id="sector" placeholder="Sector (e.g. Technology)">
-        <select id="risk_level">
-            <option value="low">Low Risk</option>
-            <option value="medium" selected>Medium Risk</option>
-            <option value="high">High Risk</option>
-        </select>
-        <input type="date" id="purchase_date" required>
-        <textarea id="notes" placeholder="Notes (optional)" rows="2"></textarea>
-        <button type="submit">Add Holding</button>
-    </form>
-    
-    <div id="message"></div>
 
     <script>
         const API_URL = '/api/portfolio';
@@ -115,7 +160,7 @@
             };
 
             if (!data.stock_ticker || !data.company_name || !data.volume || !data.purchase_price || !data.purchase_date) {
-                messageDiv.innerHTML = '<div class="error">Please fill in all required fields</div>';
+                messageDiv.innerHTML = '<div class="message error"><i class="fas fa-exclamation-circle"></i> Please fill in all required fields</div>';
                 return;
             }
 
@@ -128,15 +173,15 @@
 
                 if (response.ok) {
                     document.getElementById('add-form').reset();
-                    messageDiv.innerHTML = '<div class="success">Holding added successfully!</div>';
-                    setTimeout(() => messageDiv.innerHTML = '', 3000);
+                    messageDiv.innerHTML = '<div class="message success"><i class="fas fa-check-circle"></i> Holding added successfully to your portfolio!</div>';
+                    setTimeout(() => messageDiv.innerHTML = '', 4000);
                 } else {
                     const error = await response.json();
-                    messageDiv.innerHTML = `<div class="error">Error: ${error.error}</div>`;
+                    messageDiv.innerHTML = `<div class="message error"><i class="fas fa-exclamation-circle"></i> Error: ${error.error}</div>`;
                 }
             } catch (error) {
                 console.error('Error adding holding:', error);
-                messageDiv.innerHTML = '<div class="error">Network error. Please try again.</div>';
+                messageDiv.innerHTML = '<div class="message error"><i class="fas fa-exclamation-triangle"></i> Network error. Please try again.</div>';
             }
         }
 
