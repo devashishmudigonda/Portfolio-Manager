@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transactions - Portfolio Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="bootstrap-custom.css">
+</head>
+<body>
+    <div class="d-flex">
+        <nav class="sidebar p-4">
+            <div class="border-bottom pb-3 mb-4">
+                <h2 class="h4 text-dark mb-1">Portfolio Pro</h2>
+                <small class="text-muted">Investment Management</small>
+            </div>
+            <div class="nav flex-column">
+                <a href="index.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-plus-circle me-2"></i> Add Holdings
+                </a>
+                <a href="sell.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-minus-circle me-2"></i> Sell Holdings
+                </a>
+                <a href="table.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-table me-2"></i> View Portfolio
+                </a>
+                <a href="charts.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-chart-line me-2"></i> Analytics
+                </a>
+                <a href="transactions.html" class="nav-link nav-item active text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-exchange-alt me-2"></i> Transactions
+                </a>
+            </div>
+        </nav>
+        
+        <main class="main-content flex-fill p-4">
+            <div class="glass-card rounded-4 p-4 mb-4">
+                <h1 class="h2 text-dark mb-2">Transaction History</h1>
+                <p class="text-muted">Complete record of all buy and sell transactions</p>
+            </div>
+            
+            <div id="transaction-stats"></div>
+            
+            <div class="glass-card rounded-4 p-4">
+                <div class="mb-4">
+                    <h2 class="h4 text-dark mb-2">All Transactions</h2>
+                    <p class="text-muted">Chronological history of your investment activities</p>
+                </div>
+                <div id="transactions-table"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_URL = '/api/portfolio';
+
+        async function loadTransactions() {
+            try {
+                const response = await fetch(`${API_URL}/transactions`);
+                const transactions = await response.json();
+                displayTransactionStats(transactions);
+                displayTransactions(transactions);
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+                document.getElementById('transactions-table').innerHTML = '<div class="alert alert-danger">Error loading transaction data.</div>';
+            }
+        }
+
+        function displayTransactionStats(transactions) {
+            const totalTransactions = transactions.length;
+            const totalBuys = transactions.filter(t => t.transaction_type === 'buy').length;
+            const totalSells = transactions.filter(t => t.transaction_type === 'sell').length;
+            const totalAmount = transactions.reduce((sum, t) => sum + parseFloat(t.total_amount), 0);
+
+            document.getElementById('transaction-stats').innerHTML = `
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-primary mb-1">${totalTransactions}</div>
+                            <small class="text-muted">Total Transactions</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-success mb-1">${totalBuys}</div>
+                            <small class="text-muted">Buy Orders</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-danger mb-1">${totalSells}</div>
+                            <small class="text-muted">Sell Orders</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-warning mb-1">₹${totalAmount.toLocaleString()}</div>
+                            <small class="text-muted">Total Volume</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayTransactions(transactions) {
+            const tableDiv = document.getElementById('transactions-table');
+            
+            if (transactions.length === 0) {
+                tableDiv.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exchange-alt display-1 text-muted opacity-25 mb-3"></i>
+                        <h3 class="text-muted">No Transactions Found</h3>
+                        <p class="text-muted">Transaction history will appear here as you buy and sell assets.</p>
+                        <a href="index.html" class="btn btn-gradient btn-lg text-white mt-3">
+                            <i class="fas fa-plus me-2"></i> Add Your First Holding
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-primary">
+                            <tr>
+                                <th><i class="fas fa-calendar me-1"></i> Date</th>
+                                <th><i class="fas fa-chart-line me-1"></i> Symbol</th>
+                                <th><i class="fas fa-building me-1"></i> Company</th>
+                                <th><i class="fas fa-exchange-alt me-1"></i> Type</th>
+                                <th><i class="fas fa-coins me-1"></i> Quantity</th>
+                                <th><i class="fas fa-rupee-sign me-1"></i> Price</th>
+                                <th><i class="fas fa-calculator me-1"></i> Total</th>
+                                <th><i class="fas fa-receipt me-1"></i> Fees</th>
+                                <th><i class="fas fa-sticky-note me-1"></i> Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            transactions.forEach(transaction => {
+                const typeClass = transaction.transaction_type === 'buy' ? 'text-success' : 'text-danger';
+                const typeIcon = transaction.transaction_type === 'buy' ? 'fa-arrow-down' : 'fa-arrow-up';
+                const date = new Date(transaction.transaction_date).toLocaleDateString();
+                
+                html += `
+                    <tr>
+                        <td>${date}</td>
+                        <td><strong>${transaction.symbol}</strong></td>
+                        <td>${transaction.name}</td>
+                        <td>
+                            <span class="${typeClass}">
+                                <i class="fas ${typeIcon} me-1"></i>
+                                ${transaction.transaction_type.toUpperCase()}
+                            </span>
+                        </td>
+                        <td>${transaction.quantity.toLocaleString()}</td>
+                        <td>₹${parseFloat(transaction.price).toLocaleString()}</td>
+                        <td><strong>₹${parseFloat(transaction.total_amount).toLocaleString()}</strong></td>
+                        <td>₹${parseFloat(transaction.fees || 0).toLocaleString()}</td>
+                        <td>${transaction.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            tableDiv.innerHTML = html;
+        }
+
+        loadTransactions();
+    </script>
+</body>
+</html>

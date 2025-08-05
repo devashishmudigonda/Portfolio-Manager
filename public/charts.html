@@ -2,81 +2,143 @@
 <html>
 <head>
     <title>Analytics Dashboard - Portfolio Management</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="bootstrap-custom.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 </head>
 <body>
-    <div class="app-container">
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h1>Portfolio Pro</h1>
-                <p>Investment Management</p>
+    <div class="d-flex">
+        <nav class="sidebar p-4">
+            <div class="border-bottom pb-3 mb-4">
+                <h2 class="h4 text-dark mb-1">Portfolio Pro</h2>
+                <small class="text-muted">Investment Management</small>
             </div>
-            <div class="sidebar-nav">
-                <a href="index.html" class="nav-item">
-                    <i class="fas fa-plus-circle"></i> Add Holdings
+            <div class="nav flex-column">
+                <a href="index.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-plus-circle me-2"></i> Add Holdings
                 </a>
-                <a href="table.html" class="nav-item">
-                    <i class="fas fa-table"></i> View Portfolio
+                <a href="sell.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-minus-circle me-2"></i> Sell Holdings
                 </a>
-                <a href="charts.html" class="nav-item active">
-                    <i class="fas fa-chart-line"></i> Analytics
+                <a href="table.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-table me-2"></i> View Portfolio
+                </a>
+                <a href="charts.html" class="nav-link nav-item active text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-chart-line me-2"></i> Analytics
+                </a>
+                <a href="transactions.html" class="nav-link text-dark text-decoration-none py-3 px-3 mb-2 rounded">
+                    <i class="fas fa-exchange-alt me-2"></i> Transactions
                 </a>
             </div>
         </nav>
         
-        <main class="main-content">
-            <div class="page-header">
-                <h1 class="page-title">Portfolio Analytics</h1>
-                <p class="page-subtitle">Comprehensive insights into your investment performance</p>
+        <main class="main-content flex-fill p-4">
+            <div class="glass-card rounded-4 p-4 mb-4">
+                <h1 class="h2 text-dark mb-2">Portfolio Analytics</h1>
+                <p class="text-muted">Comprehensive insights into your investment performance</p>
             </div>
             
             <div id="portfolio-stats"></div>
             
-            <div class="charts-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Performance Analysis</h2>
-                        <p class="card-subtitle">Gain/Loss visualization with zero-line reference</p>
-                    </div>
-                    <div id="performance-chart"></div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Portfolio Distribution</h2>
-                        <p class="card-subtitle">Asset allocation by value</p>
-                    </div>
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="pie-chart"></canvas>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Performance Analysis</h4>
+                            <small class="text-muted">Gain/Loss visualization with zero-line reference</small>
+                        </div>
+                        <div id="performance-chart"></div>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Sector Allocation</h2>
-                        <p class="card-subtitle">Investment distribution across sectors</p>
-                    </div>
-                    <div id="sector-chart"></div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-header">
-                        <h2 class="card-title">Risk Analysis</h2>
-                        <p class="card-subtitle">Portfolio risk distribution</p>
-                    </div>
-                    <div style="position: relative; height: 300px; width: 100%;">
-                        <canvas id="risk-chart"></canvas>
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Portfolio Distribution</h4>
+                            <small class="text-muted">Asset allocation by value</small>
+                        </div>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="pie-chart"></canvas>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="card chart-full">
-                    <div class="card-header">
-                        <h2 class="card-title">Top Holdings Performance</h2>
-                        <p class="card-subtitle">Individual stock performance breakdown</p>
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Sector Allocation</h4>
+                            <small class="text-muted">Investment distribution across sectors</small>
+                        </div>
+                        <div id="sector-chart"></div>
                     </div>
-                    <div id="holdings-performance"></div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Risk Analysis</h4>
+                            <small class="text-muted">Portfolio risk distribution</small>
+                        </div>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="risk-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Monthly Transaction Volume</h4>
+                            <small class="text-muted">Buy vs Sell activity over time</small>
+                        </div>
+                        <div style="position: relative; height: 300px;">
+                            <canvas id="transaction-volume-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Portfolio Diversification Score</h4>
+                            <small class="text-muted">Concentration risk analysis</small>
+                        </div>
+                        <div id="diversification-score"></div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-8">
+                    <div class="glass-card rounded-4 p-4">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Asset Performance Comparison</h4>
+                            <small class="text-muted">Purchase vs Current price comparison</small>
+                        </div>
+                        <div style="position: relative; height: 400px;">
+                            <canvas id="performance-comparison-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="glass-card rounded-4 p-4">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Portfolio Health Metrics</h4>
+                            <small class="text-muted">Key performance indicators</small>
+                        </div>
+                        <div id="health-metrics"></div>
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="glass-card rounded-4 p-4">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1">Top Holdings Performance</h4>
+                            <small class="text-muted">Individual stock performance breakdown</small>
+                        </div>
+                        <div id="holdings-performance"></div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -92,16 +154,16 @@
                 
                 if (holdings.length === 0) {
                     document.querySelector('.main-content').innerHTML = `
-                        <div class="page-header">
-                            <h1 class="page-title">Portfolio Analytics</h1>
-                            <p class="page-subtitle">No data available for analysis</p>
+                        <div class="glass-card rounded-4 p-4 mb-4">
+                            <h1 class="h2 text-dark mb-2">Portfolio Analytics</h1>
+                            <p class="text-muted">No data available for analysis</p>
                         </div>
-                        <div class="card" style="text-align: center; padding: 60px;">
-                            <i class="fas fa-chart-line" style="font-size: 4em; color: #e0e0e0; margin-bottom: 20px;"></i>
-                            <h3>No Portfolio Data</h3>
-                            <p>Add some holdings to see detailed analytics and insights.</p>
-                            <a href="index.html" class="btn btn-primary" style="margin-top: 20px;">
-                                <i class="fas fa-plus"></i> Add Your First Holding
+                        <div class="glass-card rounded-4 p-5 text-center">
+                            <i class="fas fa-chart-line display-1 text-muted opacity-25 mb-3"></i>
+                            <h3 class="text-muted">No Portfolio Data</h3>
+                            <p class="text-muted">Add some holdings to see detailed analytics and insights.</p>
+                            <a href="index.html" class="btn btn-gradient btn-lg text-white mt-3">
+                                <i class="fas fa-plus me-2"></i> Add Your First Holding
                             </a>
                         </div>
                     `;
@@ -114,6 +176,10 @@
                 displaySectorChart(holdings);
                 displayRiskChart(holdings);
                 displayHoldingsPerformance(holdings);
+                displayTransactionVolumeChart();
+                displayDiversificationScore(holdings);
+                displayPerformanceComparisonChart(holdings);
+                displayHealthMetrics(holdings);
             } catch (error) {
                 console.error('Error loading portfolio:', error);
                 document.getElementById('portfolio-stats').innerHTML = '<div class="message error">Error loading portfolio data.</div>';
@@ -132,22 +198,30 @@
             }, holdings[0]);
 
             document.getElementById('portfolio-stats').innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: #667eea;">₹${totalValue.toLocaleString()}</div>
-                        <div class="stat-label">Portfolio Value</div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-primary mb-1">₹${totalValue.toLocaleString()}</div>
+                            <small class="text-muted">Portfolio Value</small>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: ${totalGainLoss >= 0 ? '#27ae60' : '#e74c3c'}">₹${totalGainLoss.toLocaleString()}</div>
-                        <div class="stat-label">Total P&L (${gainLossPercent.toFixed(1)}%)</div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 ${totalGainLoss >= 0 ? 'text-success' : 'text-danger'} mb-1">₹${totalGainLoss.toLocaleString()}</div>
+                            <small class="text-muted">Total P&L (${gainLossPercent.toFixed(1)}%)</small>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: #f39c12;">${holdings.length}</div>
-                        <div class="stat-label">Total Holdings</div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-warning mb-1">${holdings.length}</div>
+                            <small class="text-muted">Total Holdings</small>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" style="color: #27ae60;">${bestPerformer.stock_ticker}</div>
-                        <div class="stat-label">Best Performer</div>
+                    <div class="col-md-3">
+                        <div class="glass-card rounded-3 p-3 text-center">
+                            <div class="h3 text-success mb-1">${bestPerformer.stock_ticker}</div>
+                            <small class="text-muted">Best Performer</small>
+                        </div>
                     </div>
                 </div>
             `;
@@ -324,7 +398,7 @@
 
         function displayHoldingsPerformance(holdings) {
             const chartDiv = document.getElementById('holdings-performance');
-            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">';
+            let html = '<div class="row g-3">';
             
             holdings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
@@ -333,28 +407,32 @@
                 const icon = gainLoss >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
                 
                 html += `
-                    <div style="background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 16px; border-left: 4px solid ${color}; box-shadow: 0 8px 32px rgba(0,0,0,0.1); transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                            <div>
-                                <div style="font-weight: bold; font-size: 18px; color: #2c3e50; margin-bottom: 5px;">${holding.stock_ticker}</div>
-                                <div style="font-size: 14px; color: #7f8c8d;">${holding.company_name}</div>
-                            </div>
-                            <i class="fas ${icon}" style="color: ${color}; font-size: 24px;"></i>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="color: #7f8c8d;">Purchase:</span>
-                            <span style="font-weight: 600;">₹${holding.purchase_price.toLocaleString()}</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
-                            <span style="color: #7f8c8d;">Current:</span>
-                            <span style="font-weight: 600;">₹${holding.current_price.toLocaleString()}</span>
-                        </div>
-                        <div style="text-align: center; padding: 15px; background: rgba(${gainLoss >= 0 ? '39, 174, 96' : '231, 76, 60'}, 0.1); border-radius: 12px;">
-                            <div style="color: ${color}; font-weight: bold; font-size: 18px;">
-                                ${gainLoss >= 0 ? '+' : ''}₹${gainLoss.toLocaleString()}
-                            </div>
-                            <div style="color: ${color}; font-weight: 600; font-size: 14px;">
-                                ${gainLoss >= 0 ? '+' : ''}${percentage}%
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-start border-4" style="border-start-color: ${color} !important;">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <h6 class="card-title mb-1">${holding.stock_ticker}</h6>
+                                        <small class="text-muted">${holding.company_name}</small>
+                                    </div>
+                                    <i class="fas ${icon} fa-lg" style="color: ${color};"></i>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Purchase:</span>
+                                    <span class="fw-semibold">₹${holding.purchase_price.toLocaleString()}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span class="text-muted">Current:</span>
+                                    <span class="fw-semibold">₹${holding.current_price.toLocaleString()}</span>
+                                </div>
+                                <div class="text-center p-3 rounded" style="background: rgba(${gainLoss >= 0 ? '40, 167, 69' : '220, 53, 69'}, 0.1);">
+                                    <div class="h5 mb-1" style="color: ${color};">
+                                        ${gainLoss >= 0 ? '+' : ''}₹${gainLoss.toLocaleString()}
+                                    </div>
+                                    <small style="color: ${color}; font-weight: 600;">
+                                        ${gainLoss >= 0 ? '+' : ''}${percentage}%
+                                    </small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -363,6 +441,231 @@
             
             html += '</div>';
             chartDiv.innerHTML = html;
+        }
+
+        async function displayTransactionVolumeChart() {
+            try {
+                const response = await fetch(`${API_URL}/transactions`);
+                const transactions = await response.json();
+                
+                const monthlyData = {};
+                transactions.forEach(transaction => {
+                    const month = new Date(transaction.transaction_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+                    if (!monthlyData[month]) {
+                        monthlyData[month] = { buy: 0, sell: 0 };
+                    }
+                    monthlyData[month][transaction.transaction_type] += transaction.total_amount;
+                });
+                
+                const canvas = document.getElementById('transaction-volume-chart');
+                const ctx = canvas.getContext('2d');
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(monthlyData),
+                        datasets: [{
+                            label: 'Buy Volume',
+                            data: Object.values(monthlyData).map(d => d.buy),
+                            backgroundColor: '#27ae60',
+                            borderRadius: 8
+                        }, {
+                            label: 'Sell Volume',
+                            data: Object.values(monthlyData).map(d => d.sell),
+                            backgroundColor: '#e74c3c',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₹' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading transaction data:', error);
+            }
+        }
+        
+        function displayDiversificationScore(holdings) {
+            const totalValue = holdings.reduce((sum, holding) => sum + (holding.current_price * holding.volume), 0);
+            const weights = holdings.map(holding => (holding.current_price * holding.volume) / totalValue);
+            
+            // Calculate Herfindahl-Hirschman Index (HHI) for concentration
+            const hhi = weights.reduce((sum, weight) => sum + (weight * weight), 0);
+            const diversificationScore = Math.max(0, (1 - hhi) * 100);
+            
+            // Sector diversification
+            const sectors = {};
+            holdings.forEach(holding => {
+                const sector = holding.sector || 'Others';
+                const value = holding.current_price * holding.volume;
+                sectors[sector] = (sectors[sector] || 0) + value;
+            });
+            const sectorCount = Object.keys(sectors).length;
+            
+            const chartDiv = document.getElementById('diversification-score');
+            chartDiv.innerHTML = `
+                <div class="text-center mb-4">
+                    <div class="position-relative d-inline-block">
+                        <svg width="120" height="120" class="position-relative">
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="8"></circle>
+                            <circle cx="60" cy="60" r="50" fill="none" stroke="#667eea" stroke-width="8" 
+                                stroke-dasharray="${(diversificationScore / 100) * 314} 314" 
+                                stroke-dashoffset="78.5" transform="rotate(-90 60 60)"></circle>
+                        </svg>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <div class="h3 text-primary mb-0">${diversificationScore.toFixed(0)}%</div>
+                            <small class="text-muted">Score</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-3 text-center">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="h5 text-primary mb-1">${holdings.length}</div>
+                            <small class="text-muted">Assets</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="h5 text-success mb-1">${sectorCount}</div>
+                            <small class="text-muted">Sectors</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        ${diversificationScore > 80 ? '🟢 Well diversified portfolio' : 
+                          diversificationScore > 60 ? '🟡 Moderately diversified' : 
+                          '🔴 Consider diversifying more'}
+                    </small>
+                </div>
+            `;
+        }
+        
+        function displayPerformanceComparisonChart(holdings) {
+            const canvas = document.getElementById('performance-comparison-chart');
+            const ctx = canvas.getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: holdings.map(h => h.stock_ticker),
+                    datasets: [{
+                        label: 'Purchase Price',
+                        data: holdings.map(h => h.purchase_price),
+                        backgroundColor: '#95a5a6',
+                        borderRadius: 6
+                    }, {
+                        label: 'Current Price',
+                        data: holdings.map(h => h.current_price),
+                        backgroundColor: holdings.map(h => h.current_price >= h.purchase_price ? '#27ae60' : '#e74c3c'),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₹' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function displayHealthMetrics(holdings) {
+            const totalValue = holdings.reduce((sum, holding) => sum + (holding.current_price * holding.volume), 0);
+            const totalCost = holdings.reduce((sum, holding) => sum + (holding.purchase_price * holding.volume), 0);
+            const totalGainLoss = totalValue - totalCost;
+            
+            const winners = holdings.filter(h => h.current_price > h.purchase_price).length;
+            const losers = holdings.filter(h => h.current_price < h.purchase_price).length;
+            const winRate = holdings.length > 0 ? (winners / holdings.length * 100) : 0;
+            
+            const avgGainLoss = holdings.length > 0 ? (totalGainLoss / holdings.length) : 0;
+            const largestPosition = Math.max(...holdings.map(h => (h.current_price * h.volume) / totalValue * 100));
+            
+            const chartDiv = document.getElementById('health-metrics');
+            chartDiv.innerHTML = `
+                <div class="d-flex flex-column gap-3">
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Win Rate</span>
+                            <span class="fw-bold ${winRate >= 60 ? 'text-success' : winRate >= 40 ? 'text-warning' : 'text-danger'}">
+                                ${winRate.toFixed(1)}%
+                            </span>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar ${winRate >= 60 ? 'bg-success' : winRate >= 40 ? 'bg-warning' : 'bg-danger'}" 
+                                 style="width: ${winRate}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Avg P&L per Asset</span>
+                            <span class="fw-bold ${avgGainLoss >= 0 ? 'text-success' : 'text-danger'}">
+                                ₹${avgGainLoss.toLocaleString()}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted">Largest Position</span>
+                            <span class="fw-bold ${largestPosition > 30 ? 'text-danger' : largestPosition > 20 ? 'text-warning' : 'text-success'}">
+                                ${largestPosition.toFixed(1)}%
+                            </span>
+                        </div>
+                        <div class="progress mt-2" style="height: 6px;">
+                            <div class="progress-bar ${largestPosition > 30 ? 'bg-danger' : largestPosition > 20 ? 'bg-warning' : 'bg-success'}" 
+                                 style="width: ${Math.min(largestPosition, 100)}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="p-2 bg-success bg-opacity-10 rounded text-center">
+                                <div class="h6 text-success mb-0">${winners}</div>
+                                <small class="text-muted">Winners</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 bg-danger bg-opacity-10 rounded text-center">
+                                <div class="h6 text-danger mb-0">${losers}</div>
+                                <small class="text-muted">Losers</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         loadPortfolio();

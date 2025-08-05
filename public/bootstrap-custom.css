@@ -1,0 +1,46 @@
+/* Minimal Custom CSS for Portfolio Management */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    height: 100vh;
+    position: fixed;
+    width: 280px;
+}
+
+.main-content {
+    margin-left: 280px;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item.active {
+    background: rgba(102, 126, 234, 0.1);
+    border-left: 4px solid #667eea;
+    color: #667eea !important;
+}
+
+.btn-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.gain { color: #28a745; font-weight: 600; }
+.loss { color: #dc3545; font-weight: 600; }
+.risk-low { color: #28a745; }
+.risk-medium { color: #ffc107; }
+.risk-high { color: #dc3545; }
+
+@media (max-width: 768px) {
+    .sidebar { position: relative; width: 100%; height: auto; }
+    .main-content { margin-left: 0; }
+}
