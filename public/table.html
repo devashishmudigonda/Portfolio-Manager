@@ -40,6 +40,8 @@
             
             <div id="portfolio-stats"></div>
             
+            <div id="current-prices"></div>
+            
             <div class="glass-card rounded-4 p-4">
                 <div class="mb-4">
                     <h2 class="h4 text-dark mb-2">Holdings Details</h2>
@@ -86,6 +88,27 @@
             const totalCost = holdings.reduce((sum, holding) => sum + (holding.purchase_price * holding.volume), 0);
             const totalGainLoss = totalValue - totalCost;
             const gainLossPercent = totalCost > 0 ? ((totalGainLoss / totalCost) * 100) : 0;
+
+            // Display current prices section
+            const currentPricesHtml = `
+                <div class="glass-card rounded-4 p-4 mb-4">
+                    <div class="mb-3">
+                        <h2 class="h5 text-dark mb-2"><i class="fas fa-chart-line me-2"></i>Current Market Prices</h2>
+                        <p class="text-muted small">Live prices for your holdings</p>
+                    </div>
+                    <div class="row g-2">
+                        ${holdings.map(holding => `
+                            <div class="col-md-3 col-sm-4 col-6">
+                                <div class="border rounded p-2 text-center">
+                                    <div class="small text-muted">${holding.stock_ticker}</div>
+                                    <div class="fw-bold text-primary">₹${holding.current_price.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('current-prices').innerHTML = currentPricesHtml;
 
             // Display stats first
             document.getElementById('portfolio-stats').innerHTML = `
@@ -149,15 +172,18 @@
                     <tr>
                         <td><strong>${holding.stock_ticker}</strong></td>
                         <td>${holding.company_name}</td>
-                        <td><span class="badge bg-secondary">${holding.asset_type.toUpperCase()}</span></td>
+                        <td><span class="badge ${getAssetTypeBadgeClass(holding.asset_type || 'stock')}">${(holding.asset_type || 'stock').toUpperCase()}</span></td>
                         <td>${holding.volume.toLocaleString()}</td>
                         <td>₹${holding.purchase_price.toLocaleString()}</td>
                         <td>₹${holding.current_price.toLocaleString()}</td>
                         <td><strong>₹${totalHoldingValue.toLocaleString()}</strong></td>
                         <td class="${gainLossClass}">₹${gainLoss.toLocaleString()} (${percentage}%)</td>
                         <td>${holding.sector || '-'}</td>
-                        <td><span class="risk-${holding.risk_level}">${holding.risk_level.toUpperCase()}</span></td>
+                        <td><span class="risk-${holding.risk_level}">${(holding.risk_level || 'medium').toUpperCase()}</span></td>
                         <td>
+                            <button class="btn btn-outline-primary btn-sm me-1" onclick="updatePrice(${holding.id}, '${holding.stock_ticker}', ${holding.current_price})">
+                                <i class="fas fa-edit"></i>
+                            </button>
                             <button class="btn btn-outline-danger btn-sm" onclick="deleteHolding(${holding.id})">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -172,6 +198,41 @@
                 </div>
             `;
             tableDiv.innerHTML = html;
+        }
+
+        function getAssetTypeBadgeClass(assetType) {
+            const type = assetType.toLowerCase();
+            switch(type) {
+                case 'stock': return 'bg-primary';
+                case 'etf': return 'bg-success';
+                case 'crypto': return 'bg-warning text-dark';
+                case 'bond': return 'bg-info';
+                case 'mutual_fund': return 'bg-secondary';
+                default: return 'bg-primary';
+            }
+        }
+
+        async function updatePrice(id, ticker, currentPrice) {
+            const newPrice = prompt(`Update current price for ${ticker}:`, currentPrice);
+            if (!newPrice || isNaN(newPrice) || newPrice <= 0) return;
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ current_price: parseFloat(newPrice) })
+                });
+
+                if (response.ok) {
+                    loadPortfolio();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error updating price: ${errorData.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error updating price:', error);
+                alert('Network error. Please try again.');
+            }
         }
 
         async function deleteHolding(id) {

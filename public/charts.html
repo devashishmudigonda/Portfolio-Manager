@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="bootstrap-custom.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 </head>
 <body>
     <div class="d-flex">
@@ -32,6 +33,15 @@
                     <i class="fas fa-exchange-alt me-2"></i> Transactions
                 </a>
             </div>
+            <div class="mt-auto pt-4 border-top">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="text-muted small">Dark Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </nav>
         
         <main class="main-content flex-fill p-4">
@@ -43,57 +53,72 @@
             <div id="portfolio-stats"></div>
             
             <div class="row g-4">
-                <div class="col-lg-6">
+                <!-- Top Row: Key Charts -->
+                <div class="col-lg-8">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Performance Analysis</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-chart-bar me-2 text-primary"></i>Performance Analysis</h4>
                             <small class="text-muted">Gain/Loss visualization with zero-line reference</small>
                         </div>
                         <div id="performance-chart"></div>
                     </div>
                 </div>
                 
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Portfolio Distribution</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-pie-chart me-2 text-success"></i>Portfolio Distribution</h4>
                             <small class="text-muted">Asset allocation by value</small>
                         </div>
-                        <div style="position: relative; height: 300px;">
+                        <div style="position: relative; height: 280px;">
                             <canvas id="pie-chart"></canvas>
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-lg-6">
+                <!-- Second Row: Distribution Charts -->
+                <div class="col-lg-4">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Sector Allocation</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-industry me-2 text-info"></i>Sector Allocation</h4>
                             <small class="text-muted">Investment distribution across sectors</small>
                         </div>
                         <div id="sector-chart"></div>
                     </div>
                 </div>
                 
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Risk Analysis</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-layer-group me-2 text-warning"></i>Asset Types</h4>
+                            <small class="text-muted">Breakdown by asset class</small>
+                        </div>
+                        <div style="position: relative; height: 280px;">
+                            <canvas id="asset-type-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="glass-card rounded-4 p-4 h-100">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1"><i class="fas fa-shield-alt me-2 text-danger"></i>Risk Analysis</h4>
                             <small class="text-muted">Portfolio risk distribution</small>
                         </div>
-                        <div style="position: relative; height: 300px;">
+                        <div style="position: relative; height: 280px;">
                             <canvas id="risk-chart"></canvas>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Third Row: Metrics -->
                 <div class="col-lg-6">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Monthly Transaction Volume</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-chart-line me-2 text-primary"></i>Transaction Volume</h4>
                             <small class="text-muted">Buy vs Sell activity over time</small>
                         </div>
-                        <div style="position: relative; height: 300px;">
+                        <div style="position: relative; height: 280px;">
                             <canvas id="transaction-volume-chart"></canvas>
                         </div>
                     </div>
@@ -102,39 +127,41 @@
                 <div class="col-lg-6">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Portfolio Diversification Score</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-balance-scale me-2 text-success"></i>Diversification Score</h4>
                             <small class="text-muted">Concentration risk analysis</small>
                         </div>
                         <div id="diversification-score"></div>
                     </div>
                 </div>
                 
-                <div class="col-lg-8">
+                <!-- Fourth Row: Performance Details -->
+                <div class="col-lg-6">
                     <div class="glass-card rounded-4 p-4">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Asset Performance Comparison</h4>
-                            <small class="text-muted">Purchase vs Current price comparison</small>
-                        </div>
-                        <div style="position: relative; height: 400px;">
-                            <canvas id="performance-comparison-chart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4">
-                    <div class="glass-card rounded-4 p-4">
-                        <div class="mb-3">
-                            <h4 class="text-dark mb-1">Portfolio Health Metrics</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-heartbeat me-2 text-danger"></i>Portfolio Health</h4>
                             <small class="text-muted">Key performance indicators</small>
                         </div>
                         <div id="health-metrics"></div>
                     </div>
                 </div>
                 
+                <div class="col-lg-6">
+                    <div class="glass-card rounded-4 p-4">
+                        <div class="mb-3">
+                            <h4 class="text-dark mb-1"><i class="fas fa-chart-bar me-2 text-info"></i>Price Comparison</h4>
+                            <small class="text-muted">Purchase vs Current price</small>
+                        </div>
+                        <div style="position: relative; height: 280px;">
+                            <canvas id="performance-comparison-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bottom Row: Holdings Detail -->
                 <div class="col-12">
                     <div class="glass-card rounded-4 p-4">
                         <div class="mb-3">
-                            <h4 class="text-dark mb-1">Top Holdings Performance</h4>
+                            <h4 class="text-dark mb-1"><i class="fas fa-trophy me-2 text-warning"></i>Top Holdings Performance</h4>
                             <small class="text-muted">Individual stock performance breakdown</small>
                         </div>
                         <div id="holdings-performance"></div>
@@ -174,6 +201,7 @@
                 displayPerformanceChart(holdings);
                 displayPieChart(holdings);
                 displaySectorChart(holdings);
+                displayAssetTypeChart(holdings);
                 displayRiskChart(holdings);
                 displayHoldingsPerformance(holdings);
                 displayTransactionVolumeChart();
@@ -230,12 +258,15 @@
         function displayPerformanceChart(holdings) {
             const chartDiv = document.getElementById('performance-chart');
             const maxAbsValue = Math.max(...holdings.map(h => Math.abs((h.current_price - h.purchase_price) * h.volume)));
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const textColor = isDarkMode ? '#ffffff' : '#2c3e50';
+            const lineColor = isDarkMode ? '#666666' : '#2c3e50';
             
             let html = '<div style="position: relative; padding: 20px 0;">';
             
             // Add zero line
-            html += '<div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: #2c3e50; z-index: 1;"></div>';
-            html += '<div style="position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: #2c3e50; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 2;">₹0</div>';
+            html += `<div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: ${lineColor}; z-index: 1;"></div>`;
+            html += `<div style="position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: ${lineColor}; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 2;">₹0</div>`;
             
             holdings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
@@ -246,7 +277,7 @@
                     // Positive performance - right side
                     html += `
                         <div style="display: flex; align-items: center; margin: 8px 0; height: 40px; position: relative;">
-                            <div style="width: 50%; text-align: right; padding-right: 15px; font-weight: 600; color: #2c3e50;">
+                            <div style="width: 50%; text-align: right; padding-right: 15px; font-weight: 600; color: ${textColor};">
                                 ${holding.stock_ticker}
                             </div>
                             <div style="width: ${width}%; background: linear-gradient(90deg, #27ae60, #2ecc71); height: 100%; border-radius: 0 20px 20px 0; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: 600; min-width: 100px; max-width: 45%;">
@@ -263,7 +294,7 @@
                                     <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-₹${Math.abs(gainLoss).toLocaleString()} (${Math.abs(parseFloat(percentage))}%)</span>
                                 </div>
                             </div>
-                            <div style="width: 50%; text-align: left; padding-left: 15px; font-weight: 600; color: #2c3e50;">
+                            <div style="width: 50%; text-align: left; padding-left: 15px; font-weight: 600; color: ${textColor};">
                                 ${holding.stock_ticker}
                             </div>
                         </div>
@@ -330,6 +361,9 @@
             const chartDiv = document.getElementById('sector-chart');
             const maxValue = Math.max(...Object.values(sectorData));
             const colors = ['#667eea', '#27ae60', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c'];
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            const textColor = isDarkMode ? '#ffffff' : '#2c3e50';
+            const mutedColor = isDarkMode ? '#b0b0b0' : '#7f8c8d';
             let html = '';
             let colorIndex = 0;
 
@@ -339,8 +373,8 @@
                 html += `
                     <div style="margin: 15px 0;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-weight: 600; color: #2c3e50;">${sector}</span>
-                            <span style="color: #7f8c8d;">${percentage}% (₹${value.toLocaleString()})</span>
+                            <span style="font-weight: 600; color: ${textColor};">${sector}</span>
+                            <span style="color: ${mutedColor};">${percentage}% (₹${value.toLocaleString()})</span>
                         </div>
                         <div style="background: #f8f9fa; border-radius: 10px; height: 12px; overflow: hidden;">
                             <div style="width: ${width}%; height: 100%; background: ${colors[colorIndex % colors.length]}; border-radius: 10px; transition: width 0.3s ease;"></div>
@@ -351,6 +385,91 @@
             });
 
             chartDiv.innerHTML = html;
+        }
+
+        function displayAssetTypeChart(holdings) {
+            const assetTypeData = {};
+            holdings.forEach(holding => {
+                const assetType = (holding.asset_type || 'stock').toLowerCase();
+                const value = holding.current_price * holding.volume;
+                assetTypeData[assetType] = (assetTypeData[assetType] || 0) + value;
+            });
+
+            const canvas = document.getElementById('asset-type-chart');
+            const ctx = canvas.getContext('2d');
+            
+            const assetTypeColors = {
+                'stock': '#667eea',
+                'etf': '#27ae60', 
+                'crypto': '#f39c12',
+                'bond': '#9b59b6',
+                'cash': '#95a5a6'
+            };
+            
+            const labels = Object.keys(assetTypeData).map(type => {
+                switch(type) {
+                    case 'stock': return 'Stocks';
+                    case 'etf': return 'ETFs';
+                    case 'crypto': return 'Cryptocurrency';
+                    case 'bond': return 'Bonds';
+                    case 'cash': return 'Cash';
+                    default: return type.toUpperCase();
+                }
+            });
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: Object.values(assetTypeData),
+                        backgroundColor: Object.keys(assetTypeData).map(type => assetTypeColors[type] || '#34495e'),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    return data.labels.map((label, i) => {
+                                        const value = data.datasets[0].data[i];
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return {
+                                            text: `${label}: ${percentage}% (₹${value.toLocaleString()})`,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            pointStyle: 'circle'
+                                        };
+                                    });
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ₹${context.parsed.toLocaleString()} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: 10
+                    }
+                }
+            });
         }
 
         function displayRiskChart(holdings) {
@@ -400,7 +519,14 @@
             const chartDiv = document.getElementById('holdings-performance');
             let html = '<div class="row g-3">';
             
-            holdings.forEach(holding => {
+            // Sort holdings by percentage gain/loss (highest to lowest)
+            const sortedHoldings = holdings.sort((a, b) => {
+                const aPercentage = ((a.current_price - a.purchase_price) / a.purchase_price) * 100;
+                const bPercentage = ((b.current_price - b.purchase_price) / b.purchase_price) * 100;
+                return bPercentage - aPercentage;
+            });
+            
+            sortedHoldings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
                 const percentage = ((holding.current_price - holding.purchase_price) / holding.purchase_price * 100).toFixed(2);
                 const color = gainLoss >= 0 ? '#27ae60' : '#e74c3c';
@@ -507,7 +633,7 @@
             
             // Calculate Herfindahl-Hirschman Index (HHI) for concentration
             const hhi = weights.reduce((sum, weight) => sum + (weight * weight), 0);
-            const diversificationScore = Math.max(0, (1 - hhi) * 100);
+            const diversificationScore = Math.min(100, Math.max(0, (1 - hhi) * 100));
             
             // Sector diversification
             const sectors = {};
@@ -526,7 +652,8 @@
                             <circle cx="60" cy="60" r="50" fill="none" stroke="#e9ecef" stroke-width="8"></circle>
                             <circle cx="60" cy="60" r="50" fill="none" stroke="#667eea" stroke-width="8" 
                                 stroke-dasharray="${(diversificationScore / 100) * 314} 314" 
-                                stroke-dashoffset="78.5" transform="rotate(-90 60 60)"></circle>
+                                stroke-dashoffset="0" transform="rotate(-90 60 60)" 
+                                style="transition: stroke-dasharray 0.5s ease;"></circle>
                         </svg>
                         <div class="position-absolute top-50 start-50 translate-middle text-center">
                             <div class="h3 text-primary mb-0">${diversificationScore.toFixed(0)}%</div>
@@ -666,6 +793,27 @@
                     </div>
                 </div>
             `;
+        }
+
+
+
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const toggle = document.getElementById('theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                localStorage.setItem('darkMode', 'false');
+            }
+            // Refresh charts with new theme colors
+            loadPortfolio();
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').checked = true;
         }
 
         loadPortfolio();

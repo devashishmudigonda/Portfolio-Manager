@@ -103,6 +103,15 @@ class Portfolio {
         return result.affectedRows > 0;
     }
 
+    // Update only current price
+    static async updatePrice(id, currentPrice) {
+        const [result] = await db.execute(
+            'UPDATE holdings SET current_price = ? WHERE id = ?',
+            [currentPrice, id]
+        );
+        return result.affectedRows > 0;
+    }
+
     // Delete holding
     static async delete(id) {
         const [result] = await db.execute('DELETE FROM holdings WHERE id = ?', [id]);

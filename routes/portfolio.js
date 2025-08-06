@@ -47,19 +47,6 @@ router.post('/sell', async (req, res) => {
     }
 });
 
-// GET /api/portfolio/:id - Get holding by ID (must be last)
-router.get('/:id', async (req, res) => {
-    try {
-        const holding = await Portfolio.getById(req.params.id);
-        if (!holding) {
-            return res.status(404).json({ error: 'Holding not found' });
-        }
-        res.json(holding);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // POST /api/portfolio - Create new holding
 router.post('/', async (req, res) => {
     try {
@@ -78,6 +65,22 @@ router.post('/', async (req, res) => {
 // PUT /api/portfolio/:id - Update holding
 router.put('/:id', async (req, res) => {
     try {
+        console.log('PUT request body:', req.body);
+        console.log('Keys:', Object.keys(req.body));
+        console.log('Length:', Object.keys(req.body).length);
+        
+        // If only current_price is being updated
+        if (req.body.current_price !== undefined && Object.keys(req.body).length === 1) {
+            console.log('Taking price update path');
+            const updated = await Portfolio.updatePrice(req.params.id, req.body.current_price);
+            if (!updated) {
+                return res.status(404).json({ error: 'Holding not found' });
+            }
+            return res.json({ id: req.params.id, current_price: req.body.current_price });
+        }
+        
+        console.log('Taking full update path');
+        // Full update
         const { stock_ticker, company_name, asset_type, volume, purchase_price, current_price, sector, risk_level, purchase_date, notes } = req.body;
         if (!stock_ticker || !company_name || !volume || !purchase_price) {
             return res.status(400).json({ error: 'stock_ticker, company_name, volume, and purchase_price are required' });
@@ -88,6 +91,19 @@ router.put('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Holding not found' });
         }
         res.json({ id: req.params.id, ...data });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET /api/portfolio/:id - Get holding by ID (must be last)
+router.get('/:id', async (req, res) => {
+    try {
+        const holding = await Portfolio.getById(req.params.id);
+        if (!holding) {
+            return res.status(404).json({ error: 'Holding not found' });
+        }
+        res.json(holding);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
