@@ -30,6 +30,15 @@
                     <i class="fas fa-exchange-alt me-2"></i> Transactions
                 </a>
             </div>
+            <div class="mt-auto pt-4 border-top">
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="text-muted small">Dark Mode</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="theme-toggle" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
         </nav>
         
         <main class="main-content flex-fill p-4">
@@ -49,6 +58,41 @@
             </div>
         </main>
     </div>
+
+    <!-- Chatbot -->
+    <div id="chatbot" class="chatbot-container">
+        <div id="chatbot-header" class="chatbot-header" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+            <span>Help</span>
+        </div>
+        <div id="chatbot-body" class="chatbot-body" style="display: none;">
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="bot-message">Hi! I'm here to help with your portfolio. Ask me anything!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Type your question..." onkeypress="handleChatInput(event)">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .chatbot-container { position: fixed; bottom: 20px; right: 20px; width: 300px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 1000; }
+        .dark-mode .chatbot-container { background: #2c3e50; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .chatbot-header { background: #667eea; color: white; padding: 12px 16px; border-radius: 10px 10px 0 0; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .chatbot-body { height: 300px; display: flex; flex-direction: column; }
+        .chatbot-messages { flex: 1; padding: 16px; overflow-y: auto; max-height: 240px; }
+        .bot-message, .user-message { margin: 8px 0; padding: 8px 12px; border-radius: 12px; max-width: 80%; }
+        .bot-message { background: #f1f3f4; color: #333; align-self: flex-start; }
+        .dark-mode .bot-message { background: #34495e; color: #ecf0f1; }
+        .user-message { background: #667eea; color: white; align-self: flex-end; margin-left: auto; }
+        .chatbot-input { display: flex; padding: 12px; border-top: 1px solid #eee; }
+        .dark-mode .chatbot-input { border-top: 1px solid #34495e; }
+        .chatbot-input input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 12px; outline: none; background: white; color: #333; }
+        .dark-mode .chatbot-input input { background: #34495e; border: 1px solid #555; color: #ecf0f1; }
+        .dark-mode .chatbot-input input::placeholder { color: #bdc3c7; }
+        .chatbot-input button { background: #667eea; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; margin-left: 8px; cursor: pointer; }
+    </style>
 
     <script>
         const API_URL = '/api/portfolio';
@@ -170,6 +214,28 @@
             
             tableDiv.innerHTML = html;
         }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const toggle = document.getElementById('theme-toggle');
+            if (document.body.classList.contains('dark-mode')) {
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                localStorage.setItem('darkMode', 'false');
+            }
+        }
+
+        // Load saved theme
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-toggle').checked = true;
+        }
+
+        function toggleChatbot() { const body = document.getElementById('chatbot-body'); body.style.display = body.style.display === 'none' ? 'block' : 'none'; }
+        function handleChatInput(event) { if (event.key === 'Enter') sendMessage(); }
+        function sendMessage() { const input = document.getElementById('chatbot-input'); const message = input.value.trim(); if (!message) return; addMessage(message, 'user'); input.value = ''; setTimeout(() => { addMessage(getBotResponse(message), 'bot'); }, 500); }
+        function addMessage(text, type) { const messages = document.getElementById('chatbot-messages'); const div = document.createElement('div'); div.className = type === 'user' ? 'user-message' : 'bot-message'; div.textContent = text; messages.appendChild(div); messages.scrollTop = messages.scrollHeight; }
+        function getBotResponse(message) { const msg = message.toLowerCase(); if (msg.includes('transaction') || msg.includes('history')) return 'This page shows all your buy and sell transactions with dates and amounts.'; if (msg.includes('buy') || msg.includes('sell')) return 'Green arrows show buy transactions, red arrows show sell transactions.'; return 'I can help you understand your transaction history. All your trading activity is recorded here!'; }
 
         loadTransactions();
     </script>

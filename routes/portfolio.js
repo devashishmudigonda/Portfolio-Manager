@@ -2,7 +2,6 @@ const express = require('express');
 const Portfolio = require('../models/Portfolio');
 const router = express.Router();
 
-// GET /api/portfolio - Get all holdings
 router.get('/', async (req, res) => {
     try {
         const holdings = await Portfolio.getAll();
@@ -12,7 +11,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /api/portfolio/transactions - Get all transactions
 router.get('/transactions', async (req, res) => {
     try {
         const transactions = await Portfolio.getTransactions();
@@ -22,7 +20,6 @@ router.get('/transactions', async (req, res) => {
     }
 });
 
-// GET /api/portfolio/available - Get available holdings for selling
 router.get('/available', async (req, res) => {
     try {
         const holdings = await Portfolio.getAvailableHoldings();
@@ -32,7 +29,6 @@ router.get('/available', async (req, res) => {
     }
 });
 
-// POST /api/portfolio/sell - Sell holding
 router.post('/sell', async (req, res) => {
     try {
         const { stock_ticker, volume, sell_price, transaction_date, notes } = req.body;
@@ -47,7 +43,6 @@ router.post('/sell', async (req, res) => {
     }
 });
 
-// POST /api/portfolio - Create new holding
 router.post('/', async (req, res) => {
     try {
         const { stock_ticker, company_name, asset_type, volume, purchase_price, current_price, sector, risk_level, purchase_date, notes } = req.body;
@@ -62,16 +57,9 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /api/portfolio/:id - Update holding
 router.put('/:id', async (req, res) => {
     try {
-        console.log('PUT request body:', req.body);
-        console.log('Keys:', Object.keys(req.body));
-        console.log('Length:', Object.keys(req.body).length);
-        
-        // If only current_price is being updated
         if (req.body.current_price !== undefined && Object.keys(req.body).length === 1) {
-            console.log('Taking price update path');
             const updated = await Portfolio.updatePrice(req.params.id, req.body.current_price);
             if (!updated) {
                 return res.status(404).json({ error: 'Holding not found' });
@@ -79,8 +67,6 @@ router.put('/:id', async (req, res) => {
             return res.json({ id: req.params.id, current_price: req.body.current_price });
         }
         
-        console.log('Taking full update path');
-        // Full update
         const { stock_ticker, company_name, asset_type, volume, purchase_price, current_price, sector, risk_level, purchase_date, notes } = req.body;
         if (!stock_ticker || !company_name || !volume || !purchase_price) {
             return res.status(400).json({ error: 'stock_ticker, company_name, volume, and purchase_price are required' });
@@ -96,7 +82,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// GET /api/portfolio/:id - Get holding by ID (must be last)
 router.get('/:id', async (req, res) => {
     try {
         const holding = await Portfolio.getById(req.params.id);
@@ -109,7 +94,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// DELETE /api/portfolio/:id - Delete holding
 router.delete('/:id', async (req, res) => {
     try {
         const deleted = await Portfolio.delete(req.params.id);

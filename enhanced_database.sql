@@ -78,7 +78,6 @@ CREATE TABLE price_history (
     UNIQUE KEY unique_price (asset_id, price_date)
 );
 
--- Insert sample data
 INSERT INTO users (username, email, password_hash) VALUES 
 ('demo_user', 'demo@portfolio.com', 'hashed_password');
 

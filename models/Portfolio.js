@@ -1,7 +1,6 @@
 const db = require('../config/database');
 
 class Portfolio {
-    // Get all holdings with asset details
     static async getAll() {
         const [rows] = await db.execute(`
             SELECT 
@@ -25,7 +24,6 @@ class Portfolio {
         return rows;
     }
 
-    // Get holding by ID
     static async getById(id) {
         const [rows] = await db.execute(`
             SELECT 
@@ -48,13 +46,11 @@ class Portfolio {
         return rows[0];
     }
 
-    // Create new holding (with asset creation if needed)
     static async create(data) {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
 
-            // Check if asset exists, if not create it
             let [assetRows] = await connection.execute(
                 'SELECT id FROM assets WHERE symbol = ?',
                 [data.stock_ticker]
@@ -62,7 +58,6 @@ class Portfolio {
 
             let assetId;
             if (assetRows.length === 0) {
-                // Create new asset
                 const [assetResult] = await connection.execute(
                     'INSERT INTO assets (symbol, name, asset_type, sector) VALUES (?, ?, ?, ?)',
                     [data.stock_ticker, data.company_name, data.asset_type, data.sector]
@@ -72,13 +67,11 @@ class Portfolio {
                 assetId = assetRows[0].id;
             }
 
-            // Create holding
             const [holdingResult] = await connection.execute(
                 'INSERT INTO holdings (portfolio_id, asset_id, stock_ticker, company_name, asset_type, volume, purchase_price, current_price, sector, risk_level, purchase_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [1, assetId, data.stock_ticker, data.company_name, data.asset_type, data.volume, data.purchase_price, data.current_price, data.sector, data.risk_level, data.purchase_date, data.notes]
             );
 
-            // Create transaction record
             await connection.execute(
                 'INSERT INTO transactions (portfolio_id, asset_id, transaction_type, quantity, price, total_amount, transaction_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [1, assetId, 'buy', data.volume, data.purchase_price, data.purchase_price * data.volume, data.purchase_date, data.notes]
@@ -94,7 +87,6 @@ class Portfolio {
         }
     }
 
-    // Update holding
     static async update(id, data) {
         const [result] = await db.execute(
             'UPDATE holdings h LEFT JOIN assets a ON h.asset_id = a.id SET h.volume = ?, h.purchase_price = ?, h.current_price = ?, h.risk_level = ?, h.notes = ?, a.name = ?, a.asset_type = ?, a.sector = ? WHERE h.id = ?',
@@ -103,7 +95,6 @@ class Portfolio {
         return result.affectedRows > 0;
     }
 
-    // Update only current price
     static async updatePrice(id, currentPrice) {
         const [result] = await db.execute(
             'UPDATE holdings SET current_price = ? WHERE id = ?',
@@ -112,13 +103,11 @@ class Portfolio {
         return result.affectedRows > 0;
     }
 
-    // Delete holding
     static async delete(id) {
         const [result] = await db.execute('DELETE FROM holdings WHERE id = ?', [id]);
         return result.affectedRows > 0;
     }
 
-    // Get transactions
     static async getTransactions() {
         const [rows] = await db.execute(`
             SELECT 
@@ -141,13 +130,11 @@ class Portfolio {
         return rows;
     }
 
-    // Add sell transaction
     static async sellHolding(data) {
         const connection = await db.getConnection();
         try {
             await connection.beginTransaction();
 
-            // Get asset ID
             const [assetRows] = await connection.execute(
                 'SELECT id FROM assets WHERE symbol = ?',
                 [data.stock_ticker]
@@ -158,7 +145,6 @@ class Portfolio {
             }
             const assetId = assetRows[0].id;
 
-            // Check current holding
             const [holdingRows] = await connection.execute(
                 'SELECT volume FROM holdings WHERE portfolio_id = 1 AND asset_id = ?',
                 [assetId]
@@ -168,23 +154,19 @@ class Portfolio {
                 throw new Error('Insufficient holdings to sell');
             }
 
-            // Update holding quantity
             const newVolume = holdingRows[0].volume - data.volume;
             if (newVolume === 0) {
-                // Remove holding if volume becomes 0
                 await connection.execute(
                     'DELETE FROM holdings WHERE portfolio_id = 1 AND asset_id = ?',
                     [assetId]
                 );
             } else {
-                // Update holding volume
                 await connection.execute(
                     'UPDATE holdings SET volume = ? WHERE portfolio_id = 1 AND asset_id = ?',
                     [newVolume, assetId]
                 );
             }
 
-            // Create sell transaction record
             const [transactionResult] = await connection.execute(
                 'INSERT INTO transactions (portfolio_id, asset_id, transaction_type, quantity, price, total_amount, transaction_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [1, assetId, 'sell', data.volume, data.sell_price, data.sell_price * data.volume, data.transaction_date, data.notes]
@@ -200,7 +182,6 @@ class Portfolio {
         }
     }
 
-    // Get available holdings for selling
     static async getAvailableHoldings() {
         const [rows] = await db.execute(`
             SELECT 

@@ -34,6 +34,13 @@
                 </a>
             </div>
             <div class="mt-auto pt-4 border-top">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="text-muted small">Currency</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="currency-toggle" onchange="toggleCurrency()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
                 <div class="d-flex align-items-center justify-content-between">
                     <span class="text-muted small">Dark Mode</span>
                     <label class="theme-switch">
@@ -53,7 +60,6 @@
             <div id="portfolio-stats"></div>
             
             <div class="row g-4">
-                <!-- Top Row: Key Charts -->
                 <div class="col-lg-8">
                     <div class="glass-card rounded-4 p-4 h-100">
                         <div class="mb-3">
@@ -171,8 +177,132 @@
         </main>
     </div>
 
+    <!-- Chatbot -->
+    <div id="chatbot" class="chatbot-container">
+        <div id="chatbot-header" class="chatbot-header" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+            <span>Help</span>
+        </div>
+        <div id="chatbot-body" class="chatbot-body" style="display: none;">
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="bot-message">Hi! I'm here to help with your portfolio. Ask me anything!</div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Type your question..." onkeypress="handleChatInput(event)">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        .dark-mode .chatbot-container {
+            background: #2c3e50;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .chatbot-header {
+            background: #667eea;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px 10px 0 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chatbot-body {
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chatbot-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 240px;
+        }
+        .bot-message, .user-message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        .bot-message {
+            background: #f1f3f4;
+            color: #333;
+            align-self: flex-start;
+        }
+        .dark-mode .bot-message {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+        .user-message {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        .chatbot-input {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #eee;
+        }
+        .dark-mode .chatbot-input {
+            border-top: 1px solid #34495e;
+        }
+        .chatbot-input input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 12px;
+            outline: none;
+            background: white;
+            color: #333;
+        }
+        .dark-mode .chatbot-input input {
+            background: #34495e;
+            border: 1px solid #555;
+            color: #ecf0f1;
+        }
+        .dark-mode .chatbot-input input::placeholder {
+            color: #bdc3c7;
+        }
+        .chatbot-input button {
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+    </style>
+
     <script>
         const API_URL = '/api/portfolio';
+        const USD_TO_INR_RATE = 83.5; // Approximate exchange rate
+        let isUSD = false;
+        
+        function formatCurrency(amount) {
+            if (isUSD) {
+                return '$' + (amount / USD_TO_INR_RATE).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+            return '₹' + amount.toLocaleString();
+        }
+        
+        function getCurrencySymbol() {
+            return isUSD ? '$' : '₹';
+        }
 
         async function loadPortfolio() {
             try {
@@ -229,13 +359,13 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-3">
                         <div class="glass-card rounded-3 p-3 text-center">
-                            <div class="h3 text-primary mb-1">₹${totalValue.toLocaleString()}</div>
+                            <div class="h3 text-primary mb-1" data-currency="${totalValue}">${formatCurrency(totalValue)}</div>
                             <small class="text-muted">Portfolio Value</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="glass-card rounded-3 p-3 text-center">
-                            <div class="h3 ${totalGainLoss >= 0 ? 'text-success' : 'text-danger'} mb-1">₹${totalGainLoss.toLocaleString()}</div>
+                            <div class="h3 ${totalGainLoss >= 0 ? 'text-success' : 'text-danger'} mb-1" data-currency="${totalGainLoss}">${formatCurrency(totalGainLoss)}</div>
                             <small class="text-muted">Total P&L (${gainLossPercent.toFixed(1)}%)</small>
                         </div>
                     </div>
@@ -266,7 +396,7 @@
             
             // Add zero line
             html += `<div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: ${lineColor}; z-index: 1;"></div>`;
-            html += `<div style="position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: ${lineColor}; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 2;">₹0</div>`;
+            html += `<div style="position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: ${lineColor}; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; z-index: 2;">${getCurrencySymbol()}0</div>`;
             
             holdings.forEach(holding => {
                 const gainLoss = (holding.current_price - holding.purchase_price) * holding.volume;
@@ -281,7 +411,7 @@
                                 ${holding.stock_ticker}
                             </div>
                             <div style="width: ${width}%; background: linear-gradient(90deg, #27ae60, #2ecc71); height: 100%; border-radius: 0 20px 20px 0; display: flex; align-items: center; padding-left: 15px; color: white; font-weight: 600; min-width: 100px; max-width: 45%;">
-                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">+₹${gainLoss.toLocaleString()} (${percentage}%)</span>
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-currency="${gainLoss}">+${formatCurrency(gainLoss)} (${percentage}%)</span>
                             </div>
                         </div>
                     `;
@@ -291,7 +421,7 @@
                         <div style="display: flex; align-items: center; margin: 8px 0; height: 40px; position: relative;">
                             <div style="width: 50%; display: flex; justify-content: flex-end; position: relative;">
                                 <div style="width: ${width}%; background: linear-gradient(270deg, #e74c3c, #c0392b); height: 40px; border-radius: 20px 0 0 20px; display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; color: white; font-weight: 600; min-width: 100px; max-width: 100%;">
-                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-₹${Math.abs(gainLoss).toLocaleString()} (${Math.abs(parseFloat(percentage))}%)</span>
+                                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" data-currency="${Math.abs(gainLoss)}">-${formatCurrency(Math.abs(gainLoss))} (${Math.abs(parseFloat(percentage))}%)</span>
                                 </div>
                             </div>
                             <div style="width: 50%; text-align: left; padding-left: 15px; font-weight: 600; color: ${textColor};">
@@ -374,7 +504,7 @@
                     <div style="margin: 15px 0;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                             <span style="font-weight: 600; color: ${textColor};">${sector}</span>
-                            <span style="color: ${mutedColor};">${percentage}% (₹${value.toLocaleString()})</span>
+                            <span style="color: ${mutedColor};">${percentage}% (<span data-currency="${value}">${formatCurrency(value)}</span>)</span>
                         </div>
                         <div style="background: #f8f9fa; border-radius: 10px; height: 12px; overflow: hidden;">
                             <div style="width: ${width}%; height: 100%; background: ${colors[colorIndex % colors.length]}; border-radius: 10px; transition: width 0.3s ease;"></div>
@@ -447,7 +577,7 @@
                                         const value = data.datasets[0].data[i];
                                         const percentage = ((value / total) * 100).toFixed(1);
                                         return {
-                                            text: `${label}: ${percentage}% (₹${value.toLocaleString()})`,
+                                            text: `${label}: ${percentage}% (${formatCurrency(value)})`,
                                             fillStyle: data.datasets[0].backgroundColor[i],
                                             pointStyle: 'circle'
                                         };
@@ -460,7 +590,7 @@
                                 label: function(context) {
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return `${context.label}: ₹${context.parsed.toLocaleString()} (${percentage}%)`;
+                                    return `${context.label}: ${formatCurrency(context.parsed)} (${percentage}%)`;
                                 }
                             }
                         }
@@ -545,15 +675,15 @@
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Purchase:</span>
-                                    <span class="fw-semibold">₹${holding.purchase_price.toLocaleString()}</span>
+                                    <span class="fw-semibold" data-currency="${holding.purchase_price}">${formatCurrency(holding.purchase_price)}</span>
                                 </div>
                                 <div class="d-flex justify-content-between mb-3">
                                     <span class="text-muted">Current:</span>
-                                    <span class="fw-semibold">₹${holding.current_price.toLocaleString()}</span>
+                                    <span class="fw-semibold" data-currency="${holding.current_price}">${formatCurrency(holding.current_price)}</span>
                                 </div>
                                 <div class="text-center p-3 rounded" style="background: rgba(${gainLoss >= 0 ? '40, 167, 69' : '220, 53, 69'}, 0.1);">
                                     <div class="h5 mb-1" style="color: ${color};">
-                                        ${gainLoss >= 0 ? '+' : ''}₹${gainLoss.toLocaleString()}
+                                        <span data-currency="${gainLoss}">${gainLoss >= 0 ? '+' : ''}${formatCurrency(gainLoss)}</span>
                                     </div>
                                     <small style="color: ${color}; font-weight: 600;">
                                         ${gainLoss >= 0 ? '+' : ''}${percentage}%
@@ -615,7 +745,7 @@
                                 beginAtZero: true,
                                 ticks: {
                                     callback: function(value) {
-                                        return '₹' + value.toLocaleString();
+                                        return formatCurrency(value);
                                     }
                                 }
                             }
@@ -718,7 +848,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '₹' + value.toLocaleString();
+                                    return formatCurrency(value);
                                 }
                             }
                         }
@@ -758,8 +888,8 @@
                     <div class="p-3 bg-light rounded">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted">Avg P&L per Asset</span>
-                            <span class="fw-bold ${avgGainLoss >= 0 ? 'text-success' : 'text-danger'}">
-                                ₹${avgGainLoss.toLocaleString()}
+                            <span class="fw-bold ${avgGainLoss >= 0 ? 'text-success' : 'text-danger'}" data-currency="${avgGainLoss}">
+                                ${formatCurrency(avgGainLoss)}
                             </span>
                         </div>
                     </div>
@@ -810,10 +940,231 @@
             loadPortfolio();
         }
 
-        // Load saved theme
+        function toggleCurrency() {
+            isUSD = !isUSD;
+            localStorage.setItem('currency', isUSD ? 'USD' : 'INR');
+            updateCurrencyDisplay();
+        }
+        
+        function updateCurrencyDisplay() {
+            // Update all currency displays without reloading data
+            document.querySelectorAll('[data-currency]').forEach(element => {
+                const amount = parseFloat(element.dataset.currency);
+                const currentText = element.textContent;
+                
+                // Handle positive/negative signs and percentages
+                if (currentText.includes('(') && currentText.includes('%)')) {
+                    // Performance chart format: +$123 (5.2%)
+                    const percentage = currentText.match(/\(([^)]+)%\)/)[1];
+                    const sign = amount >= 0 ? '+' : '-';
+                    element.textContent = `${sign}${formatCurrency(Math.abs(amount))} (${Math.abs(percentage)}%)`;
+                } else if (currentText.includes('(') && currentText.includes(')')) {
+                    // Sector chart format: 25% ($1,234)
+                    const beforeParen = currentText.split('(')[0];
+                    element.innerHTML = `${beforeParen}(<span data-currency="${amount}">${formatCurrency(amount)}</span>)`;
+                } else if (currentText.startsWith('+') || currentText.startsWith('-')) {
+                    // Holdings performance format: +$123
+                    const sign = amount >= 0 ? '+' : '';
+                    element.textContent = `${sign}${formatCurrency(amount)}`;
+                } else {
+                    // Simple currency format
+                    element.textContent = formatCurrency(amount);
+                }
+            });
+        }
+        
+        // Load saved theme and currency
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             document.getElementById('theme-toggle').checked = true;
+        }
+        
+        if (localStorage.getItem('currency') === 'USD') {
+            isUSD = true;
+            document.getElementById('currency-toggle').checked = true;
+        }
+
+        function toggleChatbot() {
+            const body = document.getElementById('chatbot-body');
+            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function handleChatInput(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatbot-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            setTimeout(async () => {
+                const response = await getBotResponse(message);
+                addMessage(response, 'bot');
+            }, 500);
+        }
+        
+        function addMessage(text, type) {
+            const messages = document.getElementById('chatbot-messages');
+            const div = document.createElement('div');
+            div.className = type === 'user' ? 'user-message' : 'bot-message';
+            div.textContent = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        async function getBotResponse(message) {
+            const msg = message.toLowerCase();
+            
+            let holdings = [];
+            try {
+                const response = await fetch(API_URL);
+                holdings = await response.json();
+            } catch (error) {
+                console.error('Error fetching portfolio data:', error);
+            }
+            
+            if (msg.includes('suggest') || msg.includes('recommend') || msg.includes('advice')) {
+                return getPortfolioSuggestions(holdings);
+            }
+            if (msg.includes('diversif') || msg.includes('sector')) {
+                return getDiversificationAdvice(holdings);
+            }
+            if (msg.includes('risk')) {
+                return getRiskAnalysis(holdings);
+            }
+            if (msg.includes('performance') || msg.includes('profit') || msg.includes('loss')) {
+                return getPerformanceInsights(holdings);
+            }
+            if (msg.includes('portfolio') || msg.includes('holdings')) {
+                return 'You can view your portfolio on the "View Portfolio" page or see analytics here!';
+            }
+            if (msg.includes('add') || msg.includes('buy')) {
+                return 'To add new holdings, go to the "Add Holdings" page and fill in the stock details.';
+            }
+            if (msg.includes('sell')) {
+                return 'You can sell your holdings from the "Sell Holdings" page. Select the stock and quantity to sell.';
+            }
+            if (msg.includes('analytics') || msg.includes('charts')) {
+                return 'This analytics page shows your portfolio performance, sector allocation, and risk analysis!';
+            }
+            if (msg.includes('currency') || msg.includes('usd') || msg.includes('inr')) {
+                return 'Use the currency toggle in the sidebar to switch between INR and USD display.';
+            }
+            if (msg.includes('dark mode') || msg.includes('theme')) {
+                return 'Toggle dark mode using the switch in the sidebar for a better viewing experience.';
+            }
+            if (msg.includes('help') || msg.includes('how')) {
+                return 'I can help you navigate the portfolio app. Try asking about suggestions, diversification, risk analysis, or any other features!';
+            }
+            
+            return 'I\'m here to help with your portfolio management. Ask me about suggestions, diversification, risk analysis, or any other features!';
+        }
+        
+        function getPortfolioSuggestions(holdings) {
+            if (holdings.length === 0) return 'Start by adding some holdings to get personalized suggestions!';
+            
+            const suggestions = [];
+            const sectors = {};
+            const riskLevels = { low: 0, medium: 0, high: 0 };
+            let totalValue = 0;
+            
+            holdings.forEach(holding => {
+                const value = holding.current_price * holding.volume;
+                totalValue += value;
+                sectors[holding.sector || 'Others'] = (sectors[holding.sector || 'Others'] || 0) + value;
+                riskLevels[holding.risk_level] += value;
+            });
+            
+            const maxSectorValue = Math.max(...Object.values(sectors));
+            if (maxSectorValue / totalValue > 0.4) {
+                suggestions.push('Consider diversifying - one sector represents >40% of your portfolio.');
+            }
+            
+            const highRiskPercent = (riskLevels.high / totalValue) * 100;
+            if (highRiskPercent > 30) {
+                suggestions.push('High-risk holdings exceed 30%. Consider rebalancing for stability.');
+            }
+            
+            const losers = holdings.filter(h => h.current_price < h.purchase_price);
+            if (losers.length > holdings.length * 0.6) {
+                suggestions.push('60%+ holdings are in loss. Review and consider stop-loss strategies.');
+            }
+            
+            return suggestions.length > 0 ? suggestions.join(' ') : 'Your portfolio looks well-balanced! Keep monitoring performance.';
+        }
+        
+        function getDiversificationAdvice(holdings) {
+            if (holdings.length === 0) return 'Add holdings first to get diversification advice!';
+            
+            const sectors = {};
+            holdings.forEach(holding => {
+                sectors[holding.sector || 'Others'] = (sectors[holding.sector || 'Others'] || 0) + 1;
+            });
+            
+            const sectorCount = Object.keys(sectors).length;
+            const dominantSector = Object.entries(sectors).reduce((a, b) => a[1] > b[1] ? a : b);
+            
+            if (sectorCount < 3) {
+                return `You're only in ${sectorCount} sector(s). Consider adding Healthcare, Consumer Goods, or Manufacturing stocks for better diversification.`;
+            }
+            
+            if (dominantSector[1] > holdings.length * 0.5) {
+                return `${dominantSector[0]} dominates your portfolio. Consider reducing exposure and adding other sectors like Pharma, FMCG, or Auto.`;
+            }
+            
+            return 'Good sector diversification! You\'re spread across multiple sectors which reduces risk.';
+        }
+        
+        function getRiskAnalysis(holdings) {
+            if (holdings.length === 0) return 'Add holdings to get risk analysis!';
+            
+            const riskCounts = { low: 0, medium: 0, high: 0 };
+            holdings.forEach(holding => riskCounts[holding.risk_level]++);
+            
+            const highRiskPercent = (riskCounts.high / holdings.length) * 100;
+            const lowRiskPercent = (riskCounts.low / holdings.length) * 100;
+            
+            if (highRiskPercent > 50) {
+                return 'High risk alert! 50%+ holdings are high-risk. Consider adding stable blue-chip stocks like HDFC Bank or TCS for balance.';
+            }
+            
+            if (lowRiskPercent > 70) {
+                return 'Very conservative portfolio. Consider adding some growth stocks for better returns, but maintain your risk tolerance.';
+            }
+            
+            return `Balanced risk profile: ${lowRiskPercent.toFixed(0)}% low-risk, ${((riskCounts.medium/holdings.length)*100).toFixed(0)}% medium-risk, ${highRiskPercent.toFixed(0)}% high-risk.`;
+        }
+        
+        function getPerformanceInsights(holdings) {
+            if (holdings.length === 0) return 'Add holdings to get performance insights!';
+            
+            const winners = holdings.filter(h => h.current_price > h.purchase_price);
+            const losers = holdings.filter(h => h.current_price < h.purchase_price);
+            
+            const totalGainLoss = holdings.reduce((sum, h) => sum + ((h.current_price - h.purchase_price) * h.volume), 0);
+            const winRate = (winners.length / holdings.length) * 100;
+            
+            if (winRate > 70) {
+                return `Excellent! ${winRate.toFixed(0)}% of your holdings are profitable. Consider booking some profits and diversifying further.`;
+            }
+            
+            if (winRate < 40) {
+                return `${winRate.toFixed(0)}% win rate is concerning. Review underperforming stocks and consider stop-loss or averaging down strategies.`;
+            }
+            
+            const bestPerformer = holdings.reduce((best, h) => {
+                const bestGain = ((best.current_price - best.purchase_price) / best.purchase_price) * 100;
+                const currentGain = ((h.current_price - h.purchase_price) / h.purchase_price) * 100;
+                return currentGain > bestGain ? h : best;
+            });
+            
+            return `${winRate.toFixed(0)}% win rate. Best performer: ${bestPerformer.stock_ticker}. ${totalGainLoss >= 0 ? 'Overall profitable!' : 'Overall in loss - review strategy.'}`;
         }
 
         loadPortfolio();
