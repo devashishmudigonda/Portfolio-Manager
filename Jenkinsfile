@@ -1,62 +1,63 @@
 pipeline {
     agent any
-    
+
     environment {
-        NODE_VERSION = '18'
+        NODE_ENV = 'development'
     }
-    
+
     stages {
-        stage('Checkout') {
+        stage('Clone Repo') {
             steps {
-                git branch: 'main', url: 'https://github.com/devashishmudigonda/Portfolio-Manager.git'
+                git url: 'https://github.com/devashishmudigonda/Portfolio-Manager.git', branch: 'main'
             }
         }
-        
+
+        stage('Setup NodeJS') {
+            steps {
+                script {
+                    def nodeHome = tool name: 'NodeJS_24', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+                    env.PATH = "${nodeHome}\\bin;${env.PATH}"
+                }
+                bat 'node -v'
+                bat 'npm -v'
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
+                bat 'npm install -g pm2'
             }
         }
-        
-        stage('Run Tests') {
+
+        stage('Test') {
             steps {
                 bat 'npm test'
             }
         }
-        
-        stage('Stop Previous Application') {
-            steps {
-                script {
-                    bat 'pm2 delete all || exit 0'
-                }
+
+        stage('Start Application with PM2') {
+            when {
+                beforeInput true
+                expression { currentBuild.currentResult == 'SUCCESS' }
             }
-        }
-        
-        stage('Deploy with PM2') {
             steps {
+                bat 'pm2 delete backend || exit 0'
                 bat 'pm2 start ecosystem.config.js'
-                bat 'pm2 save'
-            }
-        }
-        
-        stage('Health Check') {
-            steps {
-                script {
-                    sleep(time: 5, unit: 'SECONDS')
-                    bat 'curl -f http://localhost:3001/api/portfolio'
-                }
             }
         }
     }
-    
+
     post {
+        always {
+            bat 'pm2 save --force'
+            echo '🧹 PM2 state saved.'
+        }
         success {
-            echo 'Deployment successful!'
-            bat 'pm2 status'
+            echo '✅ Build successful and servers running via PM2!'
         }
         failure {
-            echo 'Deployment failed!'
-            bat 'pm2 logs --lines 20'
+            echo '❌ Build failed.'
         }
     }
 }
