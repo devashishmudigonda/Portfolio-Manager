@@ -1,8 +1,6 @@
--- Enhanced Portfolio Management Database Schema (6 Tables)
 CREATE DATABASE IF NOT EXISTS portfolio_db;
 USE portfolio_db;
 
--- 1. Users table (for future multi-user support)
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
@@ -11,7 +9,6 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 2. Assets table (master data for stocks/bonds/etc)
 CREATE TABLE assets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     symbol VARCHAR(10) UNIQUE NOT NULL,
@@ -23,7 +20,6 @@ CREATE TABLE assets (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 3. Portfolios table (user can have multiple portfolios)
 CREATE TABLE portfolios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT DEFAULT 1,
@@ -32,25 +28,22 @@ CREATE TABLE portfolios (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+CREATE TABLE holdings (
+   id INT AUTO_INCREMENT PRIMARY KEY,
+   portfolio_id INT NOT NULL,
+   asset_id INT NOT NULL,
+   quantity INT NOT NULL,
+   average_price DECIMAL(10,2) NOT NULL,
+   current_price DECIMAL(10,2) DEFAULT 0.00,
+   risk_level ENUM('low', 'medium', 'high') DEFAULT 'medium',
+   notes TEXT,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE,
+ FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE,
+   UNIQUE KEY unique_holding (portfolio_id, asset_id)
+);
 
--- 4. Holdings table (current positions)
--- CREATE TABLE holdings (
---    id INT AUTO_INCREMENT PRIMARY KEY,
---    portfolio_id INT NOT NULL,
---    asset_id INT NOT NULL,
---    quantity INT NOT NULL,
---    average_price DECIMAL(10,2) NOT NULL,
---    current_price DECIMAL(10,2) DEFAULT 0.00,
---    risk_level ENUM('low', 'medium', 'high') DEFAULT 'medium',
---    notes TEXT,
---    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---    FOREIGN KEY (portfolio_id) REFERENCES portfolios(id) ON DELETE CASCADE,
---  FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE,
---    UNIQUE KEY unique_holding (portfolio_id, asset_id)
--- );
-
--- 5. Transactions table (buy/sell history)
 CREATE TABLE transactions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     portfolio_id INT NOT NULL,
@@ -67,7 +60,6 @@ CREATE TABLE transactions (
     FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
 );
 
--- 6. Price History table (for performance tracking)
 CREATE TABLE price_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     asset_id INT NOT NULL,
