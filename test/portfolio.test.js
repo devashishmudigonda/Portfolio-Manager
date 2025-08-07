@@ -1,3 +1,5 @@
+const { describe, test, expect } = require('@jest/globals');
+
 // Mock API responses for testing
 const mockAPI = {
   get: (url) => {

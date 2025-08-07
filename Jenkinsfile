@@ -54,10 +54,10 @@ pipeline {
             echo '🧹 PM2 state saved.'
         }
         success {
-            echo '✅ Build successful and servers running via PM2!'
+            echo 'Build successful and servers running via PM2!'
         }
         failure {
-            echo '❌ Build failed.'
+            echo 'Build failed.'
         }
     }
 }

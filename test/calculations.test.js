@@ -1,3 +1,5 @@
+const { describe, test, expect } = require('@jest/globals');
+
 // Portfolio calculation functions for testing
 function calculatePortfolioValue(holdings) {
   return holdings.reduce((sum, holding) => sum + (holding.current_price * holding.volume), 0);

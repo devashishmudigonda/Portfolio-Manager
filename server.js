@@ -15,18 +15,18 @@ app.use(express.static('public'));
 
 app.use('/api/portfolio', portfolioRoutes);
 
-app.get('/', (req, res) => {
-    res.json({
-        message: 'Portfolio Management API',
-        endpoints: {
-            'GET /api/portfolio': 'Get all holdings',
-            'GET /api/portfolio/:id': 'Get holding by ID',
-            'POST /api/portfolio': 'Create new holding',
-            'PUT /api/portfolio/:id': 'Update holding',
-            'DELETE /api/portfolio/:id': 'Delete holding'
-        }
-    });
-});
+// app.get('/', (req, res) => {
+//     res.json({
+//         message: 'Portfolio Management API',
+//         endpoints: {
+//             'GET /api/portfolio': 'Get all holdings',
+//             'GET /api/portfolio/:id': 'Get holding by ID',
+//             'POST /api/portfolio': 'Create new holding',
+//             'PUT /api/portfolio/:id': 'Update holding',
+//             'DELETE /api/portfolio/:id': 'Delete holding'
+//         }
+//     });
+// });
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
